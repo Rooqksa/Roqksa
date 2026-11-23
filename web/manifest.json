@@ -1,0 +1,14 @@
+
+{
+  "name": "Roqksa",
+  "short_name": "Roqksa",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#100D1B",
+  "theme_color": "#100D1B",
+  "description": "Roqksa - غرف صوتية وتواصل اجتماعي",
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}
