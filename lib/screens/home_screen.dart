@@ -509,12 +509,12 @@ class _RoomSearchDelegate extends SearchDelegate<void> {
       );
 
   @override
-  Widget buildResults(BuildContext context) => _buildMatches();
+  Widget buildResults(BuildContext context) => _buildMatches(context);
 
   @override
-  Widget buildSuggestions(BuildContext context) => _buildMatches();
+  Widget buildSuggestions(BuildContext context) => _buildMatches(context);
 
-  Widget _buildMatches() {
+  Widget _buildMatches(BuildContext context) {
     final matches = rooms.where((room) {
       return (room['title'] as String).contains(query.trim());
     }).toList();
