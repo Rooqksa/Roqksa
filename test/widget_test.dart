@@ -53,6 +53,12 @@ void main() {
 
     expect(find.text('أدخل بريداً إلكترونياً صحيحاً'), findsOneWidget);
     expect(find.text('الرئيسية'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'user@invalid');
+    await tester.tap(find.text('دخول تجريبي'));
+    await tester.pumpAndSettle();
+    expect(find.text('أدخل بريداً إلكترونياً صحيحاً'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
   });
 
   testWidgets('account creation requires a display name', (tester) async {
