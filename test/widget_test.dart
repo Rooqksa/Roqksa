@@ -78,7 +78,8 @@ void main() {
     expect(find.text('اكتب اسماً من حرفين على الأقل'), findsOneWidget);
     expect(find.text('الرئيسية'), findsNothing);
   });
-}
+
+
 
 
   testWidgets('account creation requires matching password confirmation', (tester) async {
@@ -104,3 +105,4 @@ void main() {
 
     expect(find.text('الرئيسية'), findsOneWidget);
   });
+}
