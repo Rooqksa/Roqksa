@@ -1,4 +1,4 @@
-import 'package:flutter/material_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RoomScreen extends StatefulWidget {
   const RoomScreen({super.key, required this.roomName});
