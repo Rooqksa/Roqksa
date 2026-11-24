@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/room_card.dart';
 import 'room_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -130,11 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
           message: 'ستظهر محادثاتك وأصدقاؤك هنا بعد إضافة خدمة الرسائل.',
         );
       case 3:
-        return _buildComingSoonPage(
-          icon: Icons.account_circle_outlined,
-          title: 'ملفك الشخصي',
-          message: 'ستتمكن هنا من تعديل صورتك واسمك ومستواك ومعلومات حسابك.',
-        );
+        return const ProfileScreen();
       default:
         return _buildHomePage();
     }
