@@ -25,5 +25,13 @@ void main() {
     await tester.tap(find.text('الرسائل').first);
     await tester.pumpAndSettle();
     expect(find.text('صديق Roqksa'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'غير موجود');
+    await tester.pumpAndSettle();
+    expect(find.text('لا توجد محادثات مطابقة'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'صديق');
+    await tester.pumpAndSettle();
+    expect(find.text('صديق Roqksa'), findsOneWidget);
   });
 }
