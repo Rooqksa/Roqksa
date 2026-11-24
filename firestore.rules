@@ -63,7 +63,10 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerId == request.auth.uid
         && request.resource.data.expiresAt is timestamp;
-      allow update, delete: if signedIn()
+      // Status content and ownership are immutable from clients. Owners may
+      // remove their own status; expiry and view counters are backend-managed.
+      allow update: if false;
+      allow delete: if signedIn()
         && resource.data.ownerId == request.auth.uid;
     }
 
@@ -71,8 +74,14 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.hostId == request.auth.uid;
+      // Clients cannot transfer room ownership or alter live-session state.
+      // Trusted backend functions will manage seats, participants and RTC state.
       allow update: if signedIn()
-        && resource.data.hostId == request.auth.uid;
+        && resource.data.hostId == request.auth.uid
+        && request.resource.data.hostId == resource.data.hostId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'title', 'description', 'updatedAt'
+        ]);
       allow delete: if signedIn()
         && resource.data.hostId == request.auth.uid;
     }
