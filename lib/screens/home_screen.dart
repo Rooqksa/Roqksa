@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedTab = 0;
   int selectedCategory = 0;
+  final List<String> myMoments = [];
 
   static const Color gold = Color(0xFFE9BD68);
   static const Color purple = Color(0xFF9B72FF);
@@ -284,49 +285,114 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMomentsRow() {
-    const moments = [
-      ('أضف لحظتك', Icons.add_rounded, Color(0xFF7953C7)),
-      ('صديق 1', Icons.person_rounded, Color(0xFFB56B83)),
-      ('صديق 2', Icons.person_rounded, Color(0xFF4C8190)),
-      ('صديق 3', Icons.person_rounded, Color(0xFF98713F)),
-      ('صديق 4', Icons.person_rounded, Color(0xFF6E8A5C)),
+    final items = <({String title, IconData icon, Color color, String? message})>[
+      (
+        title: myMoments.isEmpty ? 'أضف لحظتك' : 'لحظتك',
+        icon: myMoments.isEmpty ? Icons.add_rounded : Icons.person_rounded,
+        color: const Color(0xFF7953C7),
+        message: myMoments.isEmpty ? null : myMoments.last,
+      ),
+      (title: 'صديق 1', icon: Icons.person_rounded, color: const Color(0xFFB56B83), message: 'مساء الورد 🌹'),
+      (title: 'صديق 2', icon: Icons.person_rounded, color: const Color(0xFF4C8190), message: 'أهلاً بأصدقاء Roqksa'),
+      (title: 'صديق 3', icon: Icons.person_rounded, color: const Color(0xFF98713F), message: 'يوم جميل للجميع'),
+      (title: 'صديق 4', icon: Icons.person_rounded, color: const Color(0xFF6E8A5C), message: 'نلتقي في الغرف'),
     ];
 
     return SizedBox(
       height: 91,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: moments.length,
+        itemCount: items.length,
         separatorBuilder: (_, __) => const SizedBox(width: 15),
         itemBuilder: (context, index) {
-          final moment = moments[index];
+          final item = items[index];
           return SizedBox(
             width: 62,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: gold, width: 1.7),
+            child: InkWell(
+              onTap: () {
+                if (index == 0) {
+                  _showMomentComposer();
+                } else {
+                  _showMoment(item.title, item.message ?? '');
+                }
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: gold, width: 1.7),
+                    ),
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundColor: item.color,
+                      child: Icon(item.icon, color: Colors.white, size: 24),
+                    ),
                   ),
-                  child: CircleAvatar(
-                    radius: 25,
-                    backgroundColor: moment.$3,
-                    child: Icon(moment.$2, color: Colors.white, size: 24),
+                  const SizedBox(height: 5),
+                  Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 10, color: Colors.white70),
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  moment.$1,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 10, color: Colors.white70),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showMomentComposer() {
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('أضف لحظتك'),
+        content: TextField(
+          controller: controller,
+          maxLength: 180,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'ماذا تود أن تشارك أصدقاءك؟',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('إلغاء'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                setState(() => myMoments.add(value));
+              }
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('نشر'),
+          ),
+        ],
+      ),
+    ).whenComplete(controller.dispose);
+  }
+
+  void _showMoment(String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('إغلاق'),
+          ),
+        ],
       ),
     );
   }
