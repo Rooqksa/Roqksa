@@ -13,6 +13,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isCreatingAccount = false;
   bool _hidePassword = true;
@@ -24,6 +25,7 @@ class _AuthScreenState extends State<AuthScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _nameController.dispose();
     super.dispose();
   }
@@ -160,6 +162,25 @@ class _AuthScreenState extends State<AuthScreen> {
                           return null;
                         },
                       ),
+                      if (_isCreatingAccount) ...[
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          decoration: const InputDecoration(
+                            labelText: 'تأكيد كلمة المرور',
+                            prefixIcon: Icon(Icons.lock_reset_outlined),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value != _passwordController.text) {
+                              return 'كلمتا المرور غير متطابقتين';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                       const SizedBox(height: 22),
                       SizedBox(
                         height: 52,
