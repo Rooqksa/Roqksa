@@ -34,4 +34,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('صديق Roqksa'), findsOneWidget);
   });
+
+  testWidgets('sign-in form blocks empty and invalid email input', (tester) async {
+    await tester.pumpWidget(const RoqksaApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('دخول تجريبي'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('أدخل بريداً إلكترونياً صحيحاً'), findsOneWidget);
+    expect(find.text('كلمة المرور يجب أن تكون 6 أحرف على الأقل'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'not-an-email');
+    await tester.enterText(find.byType(TextFormField).at(1), '123456');
+    await tester.tap(find.text('دخول تجريبي'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('أدخل بريداً إلكترونياً صحيحاً'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
+  });
+
+  testWidgets('account creation requires a display name', (tester) async {
+    await tester.pumpWidget(const RoqksaApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ليس لديك حساب؟ إنشاء حساب جديد'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('إنشاء حساب تجريبي'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).at(1), 'new@roqksa.app');
+    await tester.enterText(find.byType(TextFormField).at(2), '123456');
+    await tester.tap(find.text('إنشاء حساب تجريبي'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('اكتب اسماً من حرفين على الأقل'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
+  });
 }
