@@ -421,11 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildComingSoonPage({
-    required IconData icon,
-    required String title,
-    required String message,
-  }) {
+) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(30),
@@ -514,7 +510,7 @@ class _RoomSearchDelegate extends SearchDelegate<void> {
   @override
   Widget buildSuggestions(BuildContext context) => _buildMatches(context);
 
-  Widget _buildMatches(BuildContext context) {
+  Widget _buildMatches(BuildContext buildContext) {
     final matches = rooms.where((room) {
       return (room['title'] as String).contains(query.trim());
     }).toList();
@@ -536,7 +532,7 @@ class _RoomSearchDelegate extends SearchDelegate<void> {
           trailing: const Icon(Icons.chevron_left),
           onTap: () {
             final name = room['title'] as String;
-            close(context, null);
+            close(buildContext, null);
             onOpen(name);
           },
         );
