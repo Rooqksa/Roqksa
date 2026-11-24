@@ -19,26 +19,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _editProfile() async {
     final nameController = TextEditingController(text: displayName);
     final bioController = TextEditingController(text: bio);
+    final formKey = GlobalKey<FormState>();
     final result = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
           title: const Text('تعديل الملف الشخصي'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                maxLength: 24,
-                decoration: const InputDecoration(labelText: 'الاسم الظاهر'),
-              ),
-              TextField(
-                controller: bioController,
-                maxLength: 80,
-                decoration: const InputDecoration(labelText: 'النبذة الشخصية'),
-              ),
-            ],
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  maxLength: 24,
+                  decoration: const InputDecoration(labelText: 'الاسم الظاهر'),
+                  validator: (value) {
+                    final name = value?.trim() ?? '';
+                    if (name.length < 2) return 'الاسم يجب أن يكون حرفين على الأقل';
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: bioController,
+                  maxLength: 80,
+                  decoration: const InputDecoration(labelText: 'النبذة الشخصية'),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -46,7 +55,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Text('إلغاء'),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(dialogContext, true);
+                }
+              },
               child: const Text('حفظ'),
             ),
           ],
