@@ -124,7 +124,12 @@ class _AuthScreenState extends State<AuthScreen> {
                         validator: (value) {
                           final email = value?.trim() ?? '';
                           final validEmail = RegExp(
-                            r'^[^@\\s]+@[^@\\s]+\\.[^@\\s]+
+                            r'^[^@ ]+@[^@ ]+[.][^@ ]+$',
+                          ).hasMatch(email);
+                          if (!validEmail) {
+                            return 'أدخل بريداً إلكترونياً صحيحاً';
+                          }
+                          return null;
                         },
                       ),
                       const SizedBox(height: 14),
