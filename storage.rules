@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /users/{uid}/{allPaths=**} {
+      allow read: if signedIn();
+      allow write: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.size < 25 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|video/.*');
+    }
+
+    match /private-media/{conversationId}/{fileName} {
+      // Private conversation media must be authorized through a trusted
+      // backend or a later membership-aware Storage rules integration.
+      allow read, write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
