@@ -9,11 +9,21 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
+  String searchQuery = '';
+
   final List<Map<String, String>> conversations = [
     {'name': 'صديق Roqksa', 'message': 'أهلاً، كيف حالك؟', 'time': 'الآن'},
     {'name': 'مجتمع الأصدقاء', 'message': 'نلتقي في الغرفة مساءً ❤️', 'time': 'أمس'},
     {'name': 'عضو جديد', 'message': 'تشرفت بمعرفتك', 'time': 'الأحد'},
   ];
+
+  List<Map<String, String>> get filteredConversations {
+    final query = searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return conversations;
+    return conversations.where((item) {
+      return item.values.any((value) => value.toLowerCase().contains(query));
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +49,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: TextField(
+              onChanged: (value) => setState(() => searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'ابحث في المحادثات',
                 prefixIcon: const Icon(Icons.search),
@@ -55,10 +66,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              itemCount: conversations.length,
+              itemCount: filteredConversations.length,
               separatorBuilder: (_, __) => const Divider(indent: 76, height: 1, color: Colors.white10),
               itemBuilder: (context, index) {
-                final item = conversations[index];
+                final item = filteredConversations[index];
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                   leading: CircleAvatar(
@@ -76,6 +87,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
               },
             ),
           ),
+          if (filteredConversations.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Text('لا توجد محادثات مطابقة', style: TextStyle(color: Colors.white54)),
+            ),
           Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
