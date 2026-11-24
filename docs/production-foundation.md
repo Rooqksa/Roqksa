@@ -28,6 +28,12 @@ This repository currently contains a Flutter prototype. Demo authentication, loc
 - `rooms/{id}`: room metadata and host identifier. RTC credentials are never stored in readable room documents.
 - `reports/{id}`: reporter, target, reason and timestamps; access restricted to trusted moderation tooling.
 
+## Client authorization boundaries
+
+The baseline Firestore rules intentionally keep status media/content immutable after creation; owners may delete their own status, while expiry and view tracking belong to trusted backend code. Room hosts may edit only the room title, description and update timestamp from a client. Ownership transfer, live-session state, seats, participant counts and RTC credentials must be managed by trusted backend functions. Conversation membership is immutable to clients, and message edits/deletes are disabled in this baseline.
+
+These rules are a starting point, not a production deployment. Before enabling Firebase, run positive and negative authorization tests in the Firebase Emulator Suite for at least two unrelated accounts, including attempts to read or mutate another user's private data, change ownership, forge sender IDs, and write unexpected fields. Do not deploy until those tests pass and the actual app data model has been reviewed against the rules.
+
 ## Privacy and screenshot notices
 
 For disappearing clips, store a delivery/view state and use platform screenshot signals where the OS exposes them. iOS and Android do not provide a universal guarantee that every screenshot, screen recording, external camera capture or modified-device capture can be detected. UI copy must describe notifications as best-effort, not guaranteed. Do not claim end-to-end encryption unless it is implemented and independently reviewed.
