@@ -13,6 +13,7 @@ class _RoomScreenState extends State<RoomScreen> {
   bool micRequested = false;
   int likes = 128;
   int selectedSeat = -1;
+  int requestedSeat = -1;
 
   final List<String> messages = [
     'أهلاً بالجميع في روكسا ❤️',
@@ -122,6 +123,43 @@ class _RoomScreenState extends State<RoomScreen> {
           },
         );
       },
+    ).whenComplete(controller.dispose);
+  }
+
+  void _showRoomDetails() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF201D2C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'معلومات الغرفة',
+              style: TextStyle(
+                color: gold,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 18),
+            _RoomDetailRow(icon: Icons.meeting_room_outlined, label: 'اسم الغرفة', value: widget.roomName),
+            _RoomDetailRow(icon: Icons.people_alt_outlined, label: 'المقاعد', value: '12 مقعداً'),
+            _RoomDetailRow(icon: Icons.headphones_rounded, label: 'المستمعون', value: '128 مستمعاً'),
+            _RoomDetailRow(icon: Icons.favorite_border_rounded, label: 'الإعجابات', value: '$likes'),
+            const SizedBox(height: 12),
+            const Text(
+              'الأرقام والتفاعلات المعروضة حالياً تجريبية ومحلية.',
+              style: TextStyle(color: Colors.white54, fontSize: 11),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -221,11 +259,7 @@ class _RoomScreenState extends State<RoomScreen> {
             ),
           ),
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('معلومات الغرفة')),
-              );
-            },
+            onPressed: _showRoomDetails,
             icon: const Icon(Icons.more_horiz, color: Colors.white),
           ),
         ],
@@ -315,15 +349,26 @@ class _RoomScreenState extends State<RoomScreen> {
         return InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () {
-            setState(() => selectedSeat = index);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  isEmpty ? 'طلب الجلوس في المقعد' : 'هذا ${seat['name']}',
+            if (isEmpty) {
+              setState(() {
+                selectedSeat = index;
+                requestedSeat = index;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('تم إرسال طلب الصعود إلى المقعد رقم ${index + 1}'),
+                  duration: const Duration(seconds: 2),
                 ),
-                duration: const Duration(seconds: 1),
-              ),
-            );
+              );
+            } else {
+              setState(() => selectedSeat = index);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('هذا ${seat['name']}'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
           },
           child: Column(
             children: [
@@ -368,10 +413,15 @@ class _RoomScreenState extends State<RoomScreen> {
                 )
               else
                 Text(
-                  seat['name'] as String,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  requestedSeat == index
+                      ? 'طلبك قيد الانتظار'
+                      : seat['name'] as String,
+                  style: TextStyle(
+                    color: requestedSeat == index ? gold : Colors.white70,
                     fontSize: 11,
+                    fontWeight: requestedSeat == index
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
             ],
@@ -449,6 +499,35 @@ class _RoomScreenState extends State<RoomScreen> {
             label: 'خروج',
             onTap: () => Navigator.pop(context),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoomDetailRow extends StatelessWidget {
+  const _RoomDetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFFE9BD68), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(label, style: const TextStyle(color: Colors.white70)),
+          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
