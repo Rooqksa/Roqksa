@@ -1,4 +1,4 @@
-import 'package:flutter/material_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../widgets/room_card.dart';
 import 'room_screen.dart';
 import 'profile_screen.dart';
