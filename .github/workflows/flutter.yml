@@ -13,6 +13,7 @@ permissions:
 concurrency:
   group: flutter-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   analyze-and-build:
     runs-on: ubuntu-latest
@@ -37,3 +38,62 @@ jobs:
 
       - name: Build web app
         run: flutter build web --release
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android and iOS project folders
+        run: flutter create --platforms=android,ios --org com.roqksa .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Package mobile platform source
+        run: zip -r roqksa-mobile-platforms.zip android ios
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: roqksa-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload Android and iOS project folders
+        uses: actions/upload-artifact@v4
+        with:
+          name: roqksa-mobile-platforms
+          path: roqksa-mobile-platforms.zip
+          if-no-files-found: error
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Android and iOS project folders
+        run: flutter create --platforms=android,ios --org com.roqksa .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS app without code signing
+        run: flutter build ios --release --no-codesign
