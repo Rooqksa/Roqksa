@@ -6,7 +6,9 @@ service firebase.storage {
     }
 
     match /users/{uid}/{allPaths=**} {
-      allow read: if signedIn();
+      // User uploads are private by default. Public avatars should be exposed
+      // through an explicitly designed public-media path with safe metadata.
+      allow read: if signedIn() && request.auth.uid == uid;
       allow write: if signedIn()
         && request.auth.uid == uid
         && request.resource.size < 25 * 1024 * 1024
@@ -14,8 +16,8 @@ service firebase.storage {
     }
 
     match /private-media/{conversationId}/{fileName} {
-      // Private conversation media must be authorized through a trusted
-      // backend or a later membership-aware Storage rules integration.
+      // Private conversation media remains closed until membership-aware
+      // authorization is implemented and tested.
       allow read, write: if false;
     }
 
