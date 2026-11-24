@@ -71,6 +71,7 @@ void main() {
     expect(find.text('إنشاء حساب تجريبي'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).at(1), 'new@roqksa.app');
     await tester.enterText(find.byType(TextFormField).at(2), '123456');
+    await tester.enterText(find.byType(TextFormField).at(3), '123456');
     await tester.tap(find.text('إنشاء حساب تجريبي'));
     await tester.pumpAndSettle();
 
@@ -78,3 +79,28 @@ void main() {
     expect(find.text('الرئيسية'), findsNothing);
   });
 }
+
+
+  testWidgets('account creation requires matching password confirmation', (tester) async {
+    await tester.pumpWidget(const RoqksaApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ليس لديك حساب؟ إنشاء حساب جديد'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'مستخدم جديد');
+    await tester.enterText(find.byType(TextFormField).at(1), 'new@roqksa.app');
+    await tester.enterText(find.byType(TextFormField).at(2), '123456');
+    await tester.enterText(find.byType(TextFormField).at(3), '654321');
+    await tester.tap(find.text('إنشاء حساب تجريبي'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('كلمتا المرور غير متطابقتين'), findsOneWidget);
+    expect(find.text('الرئيسية'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField).at(3), '123456');
+    await tester.tap(find.text('إنشاء حساب تجريبي'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('الرئيسية'), findsOneWidget);
+  });
