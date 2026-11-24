@@ -421,27 +421,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 38,
-              backgroundColor: purple.withValues(alpha: .18),
-              child: Icon(icon, color: gold, size: 38),
-            ),
-            const SizedBox(height: 18),
-            Text(title, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white60, height: 1.6)),
-          ],
-        ),
-      ),
-    );
-  }
 
   void _openRoom(String roomName) {
     Navigator.of(context).push(
