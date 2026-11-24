@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/room_card.dart';
 import 'room_screen.dart';
 import 'profile_screen.dart';
+import 'messages_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -125,11 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildRoomsPage();
       case 2:
-        return _buildComingSoonPage(
-          icon: Icons.forum_outlined,
-          title: 'رسائلك الخاصة',
-          message: 'ستظهر محادثاتك وأصدقاؤك هنا بعد إضافة خدمة الرسائل.',
-        );
+        return const MessagesScreen();
       case 3:
         return const ProfileScreen();
       default:
