@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material_ui.dart';
 import 'screens/auth_screen.dart';
 
 void main() {
