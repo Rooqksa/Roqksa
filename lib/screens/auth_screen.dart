@@ -117,6 +117,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        autocorrect: false,
+                        enableSuggestions: false,
                         textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           labelText: 'البريد الإلكتروني',
@@ -138,6 +141,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _hidePassword,
+                        autofillHints: [
+                          _isCreatingAccount
+                              ? AutofillHints.newPassword
+                              : AutofillHints.password,
+                        ],
+                        autocorrect: false,
+                        enableSuggestions: false,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: 'كلمة المرور',
@@ -167,6 +177,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         TextFormField(
                           controller: _confirmPasswordController,
                           obscureText: true,
+                          autofillHints: const [AutofillHints.newPassword],
+                          autocorrect: false,
+                          enableSuggestions: false,
                           textInputAction: TextInputAction.done,
                           decoration: const InputDecoration(
                             labelText: 'تأكيد كلمة المرور',
