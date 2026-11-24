@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import '../widgets/room_card.dart';
 import 'room_screen.dart';
