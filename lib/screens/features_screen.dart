@@ -28,7 +28,8 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
   ];
   Color vipColor(int n) {
     const colors = [Color(0xFF9E9E9E),Color(0xFF8D9AA6),Color(0xFF69A7C8),Color(0xFF4E91D8),Color(0xFF4776D0),Color(0xFF6957D8),Color(0xFF9256D8),Color(0xFFB04FC4),Color(0xFFD34F9A),Color(0xFFE65376),Color(0xFFE66A4C),Color(0xFFE99A3D),Color(0xFFD6B43D),Color(0xFF9AB94A),Color(0xFF55B78A),Color(0xFF39BDBD),Color(0xFFE9BD68)];
-    return colors[n.clamp(1,17)-1];
+    final level = n.clamp(1,17).toInt();
+    return colors[level-1];
   }
   Widget vip(int n) => Container(padding: const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:vipColor(n).withValues(alpha:.15),border:Border.all(color:vipColor(n)),borderRadius:BorderRadius.circular(20)),child:Text('VIP $n',style:TextStyle(color:vipColor(n),fontWeight:FontWeight.bold,fontSize:11)));
   Widget panel(Widget child) => Container(width:double.infinity,padding:const EdgeInsets.all(14),decoration:BoxDecoration(color:surface,borderRadius:BorderRadius.circular(16)),child:child);
