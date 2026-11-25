@@ -17,66 +17,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String country = 'السعودية';
 
   Future<void> _editProfile() async {
-    final nameController = TextEditingController(text: displayName);
-    final bioController = TextEditingController(text: bio);
-    final formKey = GlobalKey<FormState>();
-    final result = await showDialog<bool>(
+    final result = await showDialog<_ProfileEditResult>(
       context: context,
-      builder: (dialogContext) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: const Text('تعديل الملف الشخصي'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  maxLength: 24,
-                  decoration: const InputDecoration(labelText: 'الاسم الظاهر'),
-                  validator: (value) {
-                    final name = value?.trim() ?? '';
-                    if (name.length < 2) return 'الاسم يجب أن يكون حرفين على الأقل';
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: bioController,
-                  maxLength: 80,
-                  decoration: const InputDecoration(labelText: 'النبذة الشخصية'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.pop(dialogContext, true);
-                }
-              },
-              child: const Text('حفظ'),
-            ),
-          ],
-        ),
+      builder: (_) => _ProfileEditDialog(
+        initialName: displayName,
+        initialBio: bio,
       ),
     );
 
-    if (result == true && mounted) {
+    if (result != null && mounted) {
       setState(() {
-        if (nameController.text.trim().isNotEmpty) {
-          displayName = nameController.text.trim();
-        }
-        bio = bioController.text.trim();
+        displayName = result.name;
+        bio = result.bio;
       });
     }
-    nameController.dispose();
-    bioController.dispose();
   }
 
   void _showInfo(String title, String message) {
@@ -250,6 +204,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
               'Roqksa • الإصدار التجريبي',
               style: TextStyle(color: Colors.white.withValues(alpha: .38), fontSize: 11),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileEditResult {
+  const _ProfileEditResult({required this.name, required this.bio});
+
+  final String name;
+  final String bio;
+}
+
+class _ProfileEditDialog extends StatefulWidget {
+  const _ProfileEditDialog({
+    required this.initialName,
+    required this.initialBio,
+  });
+
+  final String initialName;
+  final String initialBio;
+
+  @override
+  State<_ProfileEditDialog> createState() => _ProfileEditDialogState();
+}
+
+class _ProfileEditDialogState extends State<_ProfileEditDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _bioController;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+    _bioController = TextEditingController(text: widget.initialBio);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: AlertDialog(
+        scrollable: true,
+        title: const Text('تعديل الملف الشخصي'),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                maxLength: 24,
+                decoration: const InputDecoration(labelText: 'الاسم الظاهر'),
+                validator: (value) {
+                  final name = value?.trim() ?? '';
+                  if (name.length < 2) {
+                    return 'الاسم يجب أن يكون حرفين على الأقل';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _bioController,
+                maxLength: 80,
+                decoration: const InputDecoration(labelText: 'النبذة الشخصية'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                Navigator.pop(
+                  context,
+                  _ProfileEditResult(
+                    name: _nameController.text.trim(),
+                    bio: _bioController.text.trim(),
+                  ),
+                );
+              }
+            },
+            child: const Text('حفظ'),
           ),
         ],
       ),
