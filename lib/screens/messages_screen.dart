@@ -106,7 +106,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       child: IconButton(
                         tooltip: 'محادثة جديدة',
                         onPressed: () => _showNotice(context),
-                        icon: const Icon(Icons.edit_square_rounded, color: _gold),
+                        icon: const Icon(Icons.edit_rounded, color: _gold),
                       ),
                     ),
                   ],
