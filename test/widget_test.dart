@@ -128,6 +128,9 @@ void main() {
     expect(find.text('عضو Roqksa'), findsOneWidget);
 
     await tester.enterText(find.byType(TextFormField).first, 'مستخدم جديد');
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('حفظ'));
     await tester.tap(find.text('حفظ'));
     await tester.pumpAndSettle();
 
