@@ -50,7 +50,7 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
     const SizedBox(height:12),heading('متجر Roqksa',Icons.shopping_bag),const SizedBox(height:10),
     GridView.builder(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),itemCount:products.length,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2,childAspectRatio:1.15,crossAxisSpacing:10,mainAxisSpacing:10),itemBuilder:(ctx,i){final p=products[i];return panel(Column(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(p['icon'] as IconData,color:p['color'] as Color,size:32),const SizedBox(height:8),Text(p['name'] as String),Text('${p['price']} عملة',style:const TextStyle(color:gold)),TextButton(onPressed:()=>ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('شراء تجريبي: ${p['name']}'))),child:const Text('شراء تجريبي'))]));}),
     const SizedBox(height:12),const Text('ملاحظة: هذه بيانات تجريبية. الزيارات والمنشورات والمشتريات الفعلية تحتاج خادماً وقاعدة بيانات ونظام دفع.',style:TextStyle(color:Colors.white38,fontSize:11))
-  ])))));
+  ]))));
   Future<void> addPost() async {
     final c=TextEditingController();
     final value=await showDialog<String>(context:context,builder:(ctx)=>Directionality(textDirection:TextDirection.rtl,child:AlertDialog(title:const Text('منشور جديد'),content:TextField(controller:c,maxLines:4,maxLength:300,decoration:const InputDecoration(hintText:'اكتب ما تريد مشاركته')),actions:[TextButton(onPressed:()=>Navigator.pop(ctx),child:const Text('إلغاء')),FilledButton(onPressed:()=>Navigator.pop(ctx,c.text.trim()),child:const Text('نشر'))])));
