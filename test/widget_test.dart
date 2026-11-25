@@ -105,4 +105,34 @@ void main() {
 
     expect(find.text('الرئيسية'), findsOneWidget);
   });
+
+  testWidgets('profile editor rejects short names and saves valid names', (tester) async {
+    await tester.pumpWidget(const RoqksaApp());
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'demo@roqksa.app');
+    await tester.enterText(find.byType(TextFormField).at(1), '123456');
+    await tester.tap(find.text('دخول تجريبي'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('حسابي'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('تعديل الملف الشخصي'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).first, 'س');
+    await tester.tap(find.text('حفظ'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('الاسم يجب أن يكون حرفين على الأقل'), findsOneWidget);
+    expect(find.text('عضو Roqksa'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).first, 'مستخدم جديد');
+    await tester.tap(find.text('حفظ'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('مستخدم جديد'), findsOneWidget);
+    expect(find.text('عضو Roqksa'), findsNothing);
+  });
+
 }
