@@ -212,7 +212,7 @@ void main() {
 
     await tester.tap(find.text('إعجاب'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('المزيد'));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
 
