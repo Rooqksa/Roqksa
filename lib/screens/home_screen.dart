@@ -5,6 +5,7 @@ import 'room_screen.dart';
 import 'profile_screen.dart';
 import 'messages_screen.dart';
 import 'features_screen.dart';
+import 'game_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -146,22 +147,111 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomePage() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(15, 8, 15, 26),
       children: [
         _buildWelcomeBanner(),
+        const SizedBox(height: 20),
+        _buildSectionTitle('العب مع أصدقائك', 'كل الألعاب', onTap: () {
+          setState(() => selectedTab = 4);
+        }),
+        const SizedBox(height: 10),
+        _buildQuickGames(),
         const SizedBox(height: 22),
         _buildSectionTitle('لحظات الأصدقاء', 'عرض الكل'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 11),
         _buildMomentsRow(),
-        const SizedBox(height: 23),
-        _buildSectionTitle('الغرف النشطة الآن', 'كل الغرف', onTap: () {
+        const SizedBox(height: 22),
+        _buildSectionTitle('غرف صوتية مقترحة', 'كل الغرف', onTap: () {
           setState(() => selectedTab = 1);
         }),
-        const SizedBox(height: 12),
+        const SizedBox(height: 11),
         ...rooms.take(3).map(_buildRoomCard),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         _buildCreateRoomButton(),
       ],
+    );
+  }
+
+  Widget _buildQuickGames() {
+    const games = <({String name, String subtitle, IconData icon, Color color, int index})>[
+      (name: 'كيرم', subtitle: 'تحدي الأصدقاء', icon: Icons.sports_esports_rounded, color: Color(0xFFFFA64D), index: 0),
+      (name: 'لودو', subtitle: 'ارمِ النرد', icon: Icons.casino_rounded, color: Color(0xFF57D6A2), index: 1),
+      (name: 'جاكارو مجنونة', subtitle: 'حماس وتحدي', icon: Icons.bolt_rounded, color: Color(0xFFFF6E9D), index: 2),
+      (name: 'جاكارو عادية', subtitle: 'اللعبة الكلاسيكية', icon: Icons.style_rounded, color: Color(0xFF7EABFF), index: 3),
+      (name: 'كاندي', subtitle: 'اجمع الحلوى', icon: Icons.emoji_food_beverage_rounded, color: Color(0xFFB58BFF), index: 4),
+      (name: 'من سيربح المليون؟', subtitle: 'اختبر معلوماتك', icon: Icons.emoji_events_rounded, color: Color(0xFFFFD166), index: 5),
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: games.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: .92,
+        crossAxisSpacing: 9,
+        mainAxisSpacing: 9,
+      ),
+      itemBuilder: (context, index) {
+        final game = games[index];
+        return Material(
+          color: const Color(0xFF172B3B),
+          borderRadius: BorderRadius.circular(19),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => GameScreen(gameName: game.name, gameIndex: game.index),
+              ),
+            ),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(7, 12, 7, 9),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(19),
+                border: Border.all(color: game.color.withValues(alpha: .30)),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    game.color.withValues(alpha: .19),
+                    const Color(0xFF172B3B),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: game.color.withValues(alpha: .17),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(game.icon, color: game.color, size: 29),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    game.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    game.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 9, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
