@@ -12,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const gold = Color(0xFFFFC86B);
 
   String displayName = 'عضو Roqksa';
   String bio = 'أهلاً بكم في عالمي الصوتي ❤️';
@@ -326,38 +325,6 @@ class _MembershipCard extends StatelessWidget {
   );
 }
 
-class _IdentityBadge extends StatelessWidget {
-  const _IdentityBadge({
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
-
-  final String label;
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: .28)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 14),
-          const SizedBox(width: 5),
-          Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700)),
-        ],
-      ),
-    );
-  }
-}
-
 class _ProfileEditResult {
   const _ProfileEditResult({
     required this.name,
@@ -538,40 +505,6 @@ class _ProfileStat extends StatelessWidget {
           const SizedBox(height: 5),
           Text(label, style: const TextStyle(color: Color(0xFF969696), fontSize: 12, fontWeight: FontWeight.w600)),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileMenuTile extends StatelessWidget {
-  const _ProfileMenuTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFF192A3B),
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: .13),
-          child: Icon(icon, color: color),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text(subtitle, style: const TextStyle(color: Colors.white54, fontSize: 11)),
-        trailing: const Icon(Icons.chevron_left, color: Colors.white54),
       ),
     );
   }
