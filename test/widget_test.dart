@@ -204,7 +204,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('طلبك قيد الانتظار'), findsOneWidget);
 
-    await tester.tap(find.text('128'));
+    await tester.tap(find.text('128').last);
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
 
