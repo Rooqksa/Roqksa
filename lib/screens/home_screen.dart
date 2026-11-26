@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),
               selectedIcon: Icon(Icons.person_rounded),
-              label: 'حسابي',
+              label: 'أنا',
             ),
             NavigationDestination(
               icon: Icon(Icons.grid_view_rounded),
