@@ -18,36 +18,36 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedCategory = 0;
   final List<String> myMoments = [];
 
-  static const Color gold = Color(0xFFE9BD68);
-  static const Color purple = Color(0xFF9B72FF);
+  static const Color gold = Color(0xFFFFC86B);
+  static const Color purple = Color(0xFF27D7D0);
 
   final List<Map<String, dynamic>> rooms = [
     {
       'title': 'سوالف آخر الليل',
       'subtitle': 'ضحك • تعارف • أصدقاء',
       'listeners': 128,
-      'color': Color(0xFF6545A5),
+      'color': Color(0xFF287E91),
       'category': 0,
     },
     {
       'title': 'مجلس Roqksa',
       'subtitle': 'أهلاً بالجميع في مجلسنا',
       'listeners': 76,
-      'color': Color(0xFF286779),
+      'color': Color(0xFF267C78),
       'category': 1,
     },
     {
       'title': 'موسيقى وهدوء',
       'subtitle': 'مساحة للاسترخاء والدردشة',
       'listeners': 42,
-      'color': Color(0xFF8A4968),
+      'color': Color(0xFF66558D),
       'category': 2,
     },
     {
       'title': 'تحدي الأسئلة',
       'subtitle': 'شاركنا التحدي واربح قلوباً',
       'listeners': 91,
-      'color': Color(0xFF986A32),
+      'color': Color(0xFF987044),
       'category': 1,
     },
   ];
@@ -226,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xFF7146C7), Color(0xFF39265F), Color(0xFF29203F)],
+          colors: [Color(0xFF168F9B), Color(0xFF176C7C), Color(0xFF21465A)],
         ),
         borderRadius: BorderRadius.circular(23),
         border: Border.all(color: Colors.white.withValues(alpha: .10)),
@@ -298,10 +298,10 @@ class _HomeScreenState extends State<HomeScreen> {
       (
         title: myMoments.isEmpty ? 'أضف لحظتك' : 'لحظتك',
         icon: myMoments.isEmpty ? Icons.add_rounded : Icons.person_rounded,
-        color: const Color(0xFF7953C7),
+        color: const Color(0xFF168F9B),
         message: myMoments.isEmpty ? null : myMoments.last,
       ),
-      (title: 'صديق 1', icon: Icons.person_rounded, color: const Color(0xFFB56B83), message: 'مساء الورد 🌹'),
+      (title: 'صديق 1', icon: Icons.person_rounded, color: const Color(0xFFB76E83), message: 'مساء الورد 🌹'),
       (title: 'صديق 2', icon: Icons.person_rounded, color: const Color(0xFF4C8190), message: 'أهلاً بأصدقاء Roqksa'),
       (title: 'صديق 3', icon: Icons.person_rounded, color: const Color(0xFF98713F), message: 'يوم جميل للجميع'),
       (title: 'صديق 4', icon: Icons.person_rounded, color: const Color(0xFF6E8A5C), message: 'نلتقي في الغرف'),
