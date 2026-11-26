@@ -85,12 +85,74 @@ test('conversation data and messages are limited to members', async () => {
   }));
 });
 
+test('status visibility supports public, accepted friends, and selected viewers', async () => {
+  const future = Timestamp.fromDate(new Date(Date.now() + 60 * 60 * 1000));
+  const alice = testEnv.authenticatedContext('alice').firestore();
+  const bob = testEnv.authenticatedContext('bob').firestore();
+  const carol = testEnv.authenticatedContext('carol').firestore();
+  const mallory = testEnv.authenticatedContext('mallory').firestore();
+
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'friendships/alice/friends/bob'), { status: 'accepted' });
+    await setDoc(doc(db, 'friendships/bob/friends/alice'), { status: 'accepted' });
+  });
+
+  await assertSucceeds(setDoc(doc(alice, 'statuses/public-1'), {
+    ownerId: 'alice',
+    text: 'للجميع',
+    visibility: 'public',
+    allowedUserIds: [],
+    expiresAt: future,
+  }));
+  await assertSucceeds(getDoc(doc(bob, 'statuses/public-1')));
+
+  await assertSucceeds(setDoc(doc(alice, 'statuses/friends-1'), {
+    ownerId: 'alice',
+    text: 'للأصدقاء',
+    visibility: 'friends',
+    allowedUserIds: [],
+    expiresAt: future,
+  }));
+  await assertSucceeds(getDoc(doc(bob, 'statuses/friends-1')));
+  await assertFails(getDoc(doc(carol, 'statuses/friends-1')));
+
+  await assertSucceeds(setDoc(doc(alice, 'statuses/selected-1'), {
+    ownerId: 'alice',
+    text: 'لأشخاص محددين',
+    visibility: 'selected',
+    allowedUserIds: ['carol'],
+    expiresAt: future,
+  }));
+  await assertSucceeds(getDoc(doc(carol, 'statuses/selected-1')));
+  await assertFails(getDoc(doc(bob, 'statuses/selected-1')));
+  await assertFails(getDoc(doc(mallory, 'statuses/selected-1')));
+
+  await assertFails(setDoc(doc(alice, 'statuses/invalid-selected'), {
+    ownerId: 'alice',
+    visibility: 'selected',
+    allowedUserIds: [],
+    expiresAt: future,
+  }));
+  await assertFails(setDoc(doc(bob, 'statuses/impersonated'), {
+    ownerId: 'alice',
+    visibility: 'public',
+    allowedUserIds: [],
+    expiresAt: future,
+  }));
+  await assertFails(setDoc(doc(bob, 'friendships/bob/friends/mallory'), {
+    status: 'accepted',
+  }));
+});
+
 test('status content is immutable and only its owner can delete it', async () => {
   const alice = testEnv.authenticatedContext('alice').firestore();
   const bob = testEnv.authenticatedContext('bob').firestore();
   await assertSucceeds(setDoc(doc(alice, 'statuses/status-1'), {
     ownerId: 'alice',
     text: 'حالة تجريبية',
+    visibility: 'public',
+    allowedUserIds: [],
     expiresAt: Timestamp.fromDate(new Date(Date.now() + 60 * 60 * 1000)),
   }));
   await assertFails(updateDoc(doc(alice, 'statuses/status-1'), { text: 'تعديل' }));
