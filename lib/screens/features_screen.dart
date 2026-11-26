@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'game_screen.dart';
+import 'admin_permissions_screen.dart';
 
 class FeaturesScreen extends StatefulWidget {
   const FeaturesScreen({super.key});
@@ -122,6 +123,17 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
                 const Text('هذه خارطة الوظائف المعتمدة؛ تظهر هنا للتوضيح، وتُفعّل الخدمات تدريجياً بعد ربط الخوادم وقواعد البيانات.', style: TextStyle(color: Colors.white60, fontSize: 12)),
                 const SizedBox(height: 10),
                 _buildFeatureGroups(),
+                const SizedBox(height: 10),
+                Card(
+                  color: surface,
+                  child: ListTile(
+                    leading: const Icon(Icons.admin_panel_settings_rounded, color: gold),
+                    title: const Text('معاينة إدارة صلاحيات الإداريين', style: TextStyle(fontWeight: FontWeight.w800)),
+                    subtitle: const Text('واجهة تجريبية — الحفظ غير مفعّل حتى ربط صلاحيات المالك بالخادم', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    trailing: const Icon(Icons.chevron_left),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AdminPermissionsScreen())),
+                  ),
+                ),
                 const SizedBox(height: 22),
                 heading('من زارني', Icons.visibility),
                 const SizedBox(height: 10),
