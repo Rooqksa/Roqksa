@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'game_screen.dart';
 
 class FeaturesScreen extends StatefulWidget {
   const FeaturesScreen({super.key});
@@ -110,7 +111,7 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
                 heading('الألعاب الجماعية', Icons.sports_esports_rounded),
                 const SizedBox(height: 6),
                 const Text(
-                  'اختر لعبتك المفضلة؛ اللعب مع الأصدقاء سيتاح بعد تجهيز خادم الألعاب.',
+                  'اضغط على أي لعبة لتجربة نسخة محلية قابلة للعب. اللعب مع الأصدقاء أونلاين سيُفعّل بعد تجهيز خادم الألعاب.',
                   style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 const SizedBox(height: 12),
@@ -254,7 +255,7 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: () => _showGameComingSoon(game),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => GameScreen(gameName: game.name, gameIndex: index))),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
@@ -271,14 +272,7 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
                         child: Icon(game.icon, color: game.color),
                       ),
                       const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: gold.withValues(alpha: .13),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text('قريباً', style: TextStyle(color: gold, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
+                      const Icon(Icons.play_circle_fill_rounded, color: turquoise, size: 24),
                     ]),
                     const Spacer(),
                     Text(game.name, maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -293,28 +287,6 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
           );
         },
       );
-
-  void _showGameComingSoon(_GameInfo game) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          title: Row(children: [
-            Icon(game.icon, color: game.color),
-            const SizedBox(width: 8),
-            Expanded(child: Text(game.name)),
-          ]),
-          content: const Text(
-            'هذه اللعبة ضمن ألعاب Roqksa القادمة. سنفعّل إنشاء الغرف واللعب مع الأصدقاء بعد تجهيز خادم الألعاب. لن يتم احتساب نقاط أو نتائج قبل تفعيل الخدمة.',
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('حسناً')),
-          ],
-        ),
-      ),
-    );
-  }
 
   Future<void> addPost() async {
     final c = TextEditingController();
