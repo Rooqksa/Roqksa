@@ -18,8 +18,8 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isCreatingAccount = false;
   bool _hidePassword = true;
 
-  static const _purple = Color(0xFF9B72FF);
-  static const _gold = Color(0xFFE9BD68);
+  static const _purple = Color(0xFF27D7D0);
+  static const _gold = Color(0xFFFFC86B);
 
   @override
   void dispose() {
@@ -66,7 +66,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_purple, Color(0xFFCB78E8)],
+                            colors: [_purple, Color(0xFF5DE0D7)],
                           ),
                           borderRadius: BorderRadius.circular(24),
                         ),
@@ -226,7 +226,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(13),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF211C31),
+                          color: const Color(0xFF192A3B),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.white12),
                         ),
