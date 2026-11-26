@@ -180,7 +180,7 @@ class _RoomScreenState extends State<RoomScreen> {
       _bottomAction(Icons.chat_bubble_outline, 'الدردشة', () {}),
       _bottomAction(Icons.card_giftcard, 'الهدايا', _giftSheet, color: const Color(0xFFFF9BCB)),
       _bottomAction(Icons.menu, 'القائمة', _roomMenu),
-      _bottomAction(micRequested ? Icons.mic : Icons.mic_off, micRequested ? 'إلغاء الطلب' : 'طلب المايك',
+      _bottomAction(micRequested ? Icons.mic_rounded : Icons.mic_off_rounded, micRequested ? 'إلغاء الطلب' : 'طلب المايك',
         () => setState(() => micRequested = !micRequested), color: aqua),
       _bottomAction(Icons.exit_to_app, 'خروج', () => Navigator.pop(context)),
     ]));
