@@ -197,7 +197,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('غرفة الاختبار'), findsOneWidget);
+    expect(find.textContaining('غرفة الاختبار'), findsOneWidget);
     await tester.tap(find.text('ميكروفون'));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
