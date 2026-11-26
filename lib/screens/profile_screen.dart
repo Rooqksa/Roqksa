@@ -9,8 +9,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  static const gold = Color(0xFFE9BD68);
-  static const purple = Color(0xFF9B72FF);
+  static const gold = Color(0xFFFFC86B);
+  static const purple = Color(0xFF27D7D0);
 
   String displayName = 'عضو Roqksa';
   String bio = 'أهلاً بكم في عالمي الصوتي ❤️';
@@ -82,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF6842A9), Color(0xFF29213F)],
+                colors: [Color(0xFF1C8992), Color(0xFF1B3546)],
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
               ),
@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: const CircleAvatar(
                         radius: 43,
-                        backgroundColor: Color(0xFF40345D),
+                        backgroundColor: Color(0xFF245064),
                         child: Icon(Icons.person_rounded, size: 48, color: gold),
                       ),
                     ),
@@ -112,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: gold,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.camera_alt, size: 15, color: Color(0xFF241B32)),
+                      child: const Icon(Icons.camera_alt, size: 15, color: Color(0xFF162B3B)),
                     ),
                   ],
                 ),
@@ -319,12 +319,12 @@ class _ProfileStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFF211C31),
+        color: const Color(0xFF192A3B),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFE9BD68), size: 19),
+          Icon(icon, color: const Color(0xFFFFC86B), size: 19),
           const SizedBox(height: 7),
           Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
           const SizedBox(height: 3),
@@ -353,7 +353,7 @@ class _ProfileMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: const Color(0xFF211C31),
+      color: const Color(0xFF192A3B),
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         onTap: onTap,
