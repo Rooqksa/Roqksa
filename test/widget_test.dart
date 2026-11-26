@@ -204,7 +204,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('طلبك قيد الانتظار'), findsOneWidget);
 
-    await tester.tap(find.text('128').last);
+    // Let the seat-request SnackBar disappear so it cannot cover the bottom controls.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.favorite));
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
 
