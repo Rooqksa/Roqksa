@@ -126,7 +126,7 @@ void main() {
 
  
   testWidgets('room controls update local mic, seat request and likes', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
+    tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -148,6 +148,7 @@ void main() {
     tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).hideCurrentSnackBar();
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.byIcon(Icons.more_horiz_rounded));
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     expect(find.text('خيارات الغرفة'), findsOneWidget);
