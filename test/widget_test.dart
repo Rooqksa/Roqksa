@@ -148,12 +148,13 @@ void main() {
     tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).hideCurrentSnackBar();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('الخيارات'));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
+    expect(find.text('خيارات الغرفة'), findsOneWidget);
     await tester.tap(find.text('إرسال إعجاب'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('الخيارات'));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     await tester.tap(find.text('معلومات الغرفة'));
     await tester.pumpAndSettle();
