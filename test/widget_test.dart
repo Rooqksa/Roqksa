@@ -206,8 +206,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('بانتظار الموافقة'), findsOneWidget);
 
-    // Let the seat-request SnackBar disappear before using the room controls.
-    await tester.pump(const Duration(seconds: 3));
+    // Dismiss the seat-request SnackBar so it cannot cover the bottom controls.
+    tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).hideCurrentSnackBar();
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('إعجاب'));
