@@ -109,249 +109,221 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const ink = Color(0xFF292929);
+    const muted = Color(0xFF969696);
+    const page = Color(0xFFF3F5F8);
+    const mint = Color(0xFF43D9B1);
+    final actions = <({String title, IconData icon, Color color, String message})>[
+      (title: 'المستوى', icon: Icons.workspace_premium_rounded, color: Color(0xFF45D9A8), message: 'تفاصيل مستوى العضوية ستظهر هنا.'),
+      (title: 'مستوى اللعبة', icon: Icons.emoji_events_rounded, color: Color(0xFFFF896F), message: 'مستوى اللعبة ومكافآته.'),
+      (title: 'التأثير', icon: Icons.diamond_rounded, color: Color(0xFF9285F6), message: 'مؤشر التأثير والتفاعل.'),
+      (title: 'شارة ولقب', icon: Icons.stars_rounded, color: Color(0xFFFFC34E), message: 'الألقاب والشارات المتاحة.'),
+      (title: 'مكان السي بي', icon: Icons.favorite_rounded, color: Color(0xFFF45B9C), message: 'إعدادات مكانك المفضل.'),
+      (title: 'الأيدي المميزة', icon: Icons.shield_rounded, color: Color(0xFF39BDEB), message: 'الأرقام المميزة.'),
+      (title: 'متجر', icon: Icons.shopping_bag_rounded, color: Color(0xFF38CDAA), message: 'متجر الهدايا والعناصر.'),
+      (title: 'شخص غامض', icon: Icons.masks_rounded, color: Color(0xFFB28AF2), message: 'خيارات الظهور والشخصيات.'),
+    ];
+
+    Widget menuRow(IconData icon, String title, VoidCallback onTap) {
+      return ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+        leading: Icon(icon, color: ink, size: 27),
+        title: Text(title, style: const TextStyle(color: ink, fontSize: 17, fontWeight: FontWeight.w700)),
+        trailing: const Icon(Icons.chevron_left, color: Color(0xFFCACACA), size: 27),
+      );
+    }
+
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'حسابي',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-                ),
-              ),
-              IconButton(
-                tooltip: 'الإعدادات',
-                onPressed: () => _showInfo(
-                  'إعدادات الحساب',
-                  'سيتم تفعيل إعدادات الخصوصية والأمان والإشعارات بعد ربط خدمات الحساب.',
-                ),
-                icon: const Icon(Icons.settings_outlined),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF1C8992), Color(0xFF1B3546)],
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withValues(alpha: .10)),
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.bottomLeft,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: gold, width: 2),
+      child: ColoredBox(
+        color: page,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 22),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: mint, width: 2)),
+                        child: const CircleAvatar(
+                          radius: 43,
+                          backgroundColor: Color(0xFFE8F4F1),
+                          child: Icon(Icons.person_rounded, color: Color(0xFF5C9D8D), size: 48),
+                        ),
                       ),
-                      child: const CircleAvatar(
-                        radius: 43,
-                        backgroundColor: Color(0xFF245064),
-                        child: Icon(Icons.person_rounded, size: 48, color: gold),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: [
+                              Flexible(child: Text(displayName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: ink, fontSize: 23, fontWeight: FontWeight.w900))),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.male_rounded, color: Color(0xFF55AFFF), size: 22),
+                            ]),
+                            const SizedBox(height: 5),
+                            Text('ID: ${FirebaseAuth.instance.currentUser?.uid.substring(0, 7) ?? '—'}',
+                              style: const TextStyle(color: muted, fontSize: 14)),
+                            const SizedBox(height: 9),
+                            Wrap(spacing: 6, runSpacing: 5, children: const [
+                              _ProfilePill(icon: Icons.emoji_events_rounded, label: '4', color: Color(0xFFEBCB87)),
+                              _ProfilePill(icon: Icons.favorite, label: '79', color: Color(0xFFF05A67)),
+                              _ProfilePill(icon: Icons.diamond_rounded, label: '78', color: Color(0xFF9A58E9)),
+                            ]),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        color: gold,
-                        shape: BoxShape.circle,
+                      IconButton(
+                        tooltip: 'تعديل الملف الشخصي',
+                        onPressed: _editProfile,
+                        icon: const Icon(Icons.edit_outlined, color: ink),
                       ),
-                      child: const Icon(Icons.camera_alt, size: 15, color: Color(0xFF162B3B)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(displayName, style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 5),
-                Text(bio, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (!hideCountry) ...[
-                      const Icon(Icons.location_on_outlined, size: 15, color: gold),
-                      const SizedBox(width: 4),
-                      Text(country, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                      const SizedBox(width: 12),
                     ],
-                    const Icon(Icons.verified_user_outlined, size: 15, color: gold),
-                    const SizedBox(width: 4),
-                    const Text('حساب تجريبي', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: _editProfile,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: const Text('تعديل الملف الشخصي'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withValues(alpha: .35)),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(bio, maxLines: 2, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: muted, fontSize: 14)),
+                  ),
+                  if (!hideCountry) Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Text('📍 $country', style: const TextStyle(color: muted, fontSize: 12)),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 23),
+                  const Row(children: [
+                    Expanded(child: _ProfileStat(value: '—', label: 'المتابعة')),
+                    Expanded(child: _ProfileStat(value: '—', label: 'المعجبون')),
+                    Expanded(child: _ProfileStat(value: '—', label: 'الزوار')),
+                  ]),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF192A3B),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: gold.withValues(alpha: .18)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.workspace_premium_rounded, color: gold, size: 19),
-                    const SizedBox(width: 7),
-                    const Expanded(
-                      child: Text(
-                        'الرتبة والألقاب',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 17, 16, 18),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+              child: Column(
+                children: [
+                  Row(children: [
+                    const Expanded(child: Text('محفظة النقود', style: TextStyle(color: ink, fontSize: 19, fontWeight: FontWeight.w900))),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: gold.withValues(alpha: .14),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'VIP 1',
-                        style: TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(color: const Color(0xFFFF8B28), borderRadius: BorderRadius.circular(20)),
+                      child: const Text('قسيمة شراء لأول مرة 🎁', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800)),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    _IdentityBadge(label: 'عضو المجتمع', icon: Icons.person_rounded, color: const Color(0xFF5DE0D7)),
-                    _IdentityBadge(label: 'محب الألعاب', icon: Icons.sports_esports_rounded, color: const Color(0xFF69B7E8)),
-                    _IdentityBadge(label: 'صديق المجتمع', icon: Icons.diversity_3_rounded, color: const Color(0xFFB49BFF)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'الألقاب المعروضة تجريبية؛ منح الألقاب ومستويات VIP الفعلية يتطلب صلاحيات وخدمات خلفية.',
-                  style: TextStyle(color: Colors.white38, fontSize: 10, height: 1.4),
-                ),
-              ],
+                    const SizedBox(width: 5),
+                    const Icon(Icons.chevron_left, color: Color(0xFFCCCCCC)),
+                  ]),
+                  const SizedBox(height: 16),
+                  Row(children: [
+                    Expanded(child: _MembershipCard(title: 'SVIP', icon: Icons.workspace_premium_rounded, color: Color(0xFFF6D2BC), onTap: () => _showInfo('SVIP', 'مزايا SVIP لم تُفعّل بعد.'))),
+                    const SizedBox(width: 12),
+                    Expanded(child: _MembershipCard(title: 'VIP', icon: Icons.military_tech_rounded, color: Color(0xFFFFE9A5), onTap: () => _showInfo('VIP', 'مستويات VIP من 1 إلى 17 ستظهر بعد ربط الاشتراكات والتحقق من الدفع.'))),
+                  ]),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: const [
-              Expanded(child: _ProfileStat(value: '0', label: 'الأصدقاء', icon: Icons.people_outline)),
-              SizedBox(width: 10),
-              Expanded(child: _ProfileStat(value: '0', label: 'المتابعون', icon: Icons.favorite_border)),
-              SizedBox(width: 10),
-              Expanded(child: _ProfileStat(value: '1', label: 'المستوى', icon: Icons.workspace_premium_outlined)),
-            ],
-          ),
-          const SizedBox(height: 22),
-          const Text('حسابي وخدماتي', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 10),
-          _ProfileMenuTile(
-            icon: Icons.visibility_outlined,
-            title: 'من الذي رأني',
-            subtitle: 'اعرف من زار ملفك الشخصي',
-            color: const Color(0xFF5DE0D7),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileVisitorsScreen())),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.article_outlined,
-            title: 'منشوراتي',
-            subtitle: 'إدارة منشوراتك وتفاعلات الأصدقاء',
-            color: const Color(0xFF69B7E8),
-            onTap: () => _showInfo('منشوراتي', 'ستظهر منشوراتك هنا بعد تفعيل خدمة المنشورات.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.account_balance_wallet_outlined,
-            title: 'محفظتي',
-            subtitle: 'رصيد العملات وسجل العمليات',
-            color: gold,
-            onTap: () => _showInfo('محفظتي', 'المحفظة حالياً واجهة فقط. لن يتم تنفيذ أي تحويل أو شراء قبل ربط نظام مالي آمن بالخادم.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.local_offer_outlined,
-            title: 'مركز العروض',
-            subtitle: 'العروض والمكافآت المتاحة',
-            color: const Color(0xFFFF9D70),
-            onTap: () => _showInfo('مركز العروض', 'سيتم عرض العروض الفعلية هنا عند تجهيز نظام العروض.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.workspace_premium_outlined,
-            title: 'VIP',
-            subtitle: 'مزايا واشتراكات VIP',
-            color: const Color(0xFFFFD166),
-            onTap: () => _showInfo('VIP', 'ستظهر مستويات VIP ومزاياها من 1 إلى 17 بعد ربط الاشتراكات والتحقق من الدفع.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.diamond_outlined,
-            title: 'استثمار المنجم',
-            subtitle: 'منجم العملات والمكافآت',
-            color: const Color(0xFFB49BFF),
-            onTap: () => _showInfo('استثمار المنجم', 'هذه الخدمة لم تُفعّل بعد. لن نعرض أرباحاً أو نستقبل أموالاً قبل بناء نظام موثوق وآمن لها.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.storefront_outlined,
-            title: 'المركز التجاري',
-            subtitle: 'الهدايا والعناصر والمتجر',
-            color: const Color(0xFFFF8EAC),
-            onTap: () => _showInfo('المركز التجاري', 'سيتم ربط المتجر بالهدايا والعناصر والعملات بعد تجهيز خدمات الشراء الآمنة.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.person_add_alt_1_rounded,
-            title: 'ادعو الأصدقاء',
-            subtitle: 'شارك Roqksa مع أصدقائك',
-            color: const Color(0xFF73D69B),
-            onTap: () => _showInfo('ادعو الأصدقاء', 'سيتم إضافة رابط دعوة خاص بك ومتابعة الدعوات هنا.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.help_outline_rounded,
-            title: 'المساعدة',
-            subtitle: 'الأسئلة الشائعة والتواصل مع الدعم',
-            color: const Color(0xFF76C7F2),
-            onTap: () => _showInfo('المساعدة', 'سيتم إضافة مركز المساعدة ووسيلة التواصل مع فريق Roqksa.'),
-          ),
-          _ProfileMenuTile(
-            icon: Icons.settings_outlined,
-            title: 'الإعدادات',
-            subtitle: 'الخصوصية والأمان والإشعارات',
-            color: const Color(0xFFB0BEC5),
-            onTap: () => _showInfo('الإعدادات', 'سيتم إضافة إعدادات الحساب والخصوصية والأمان والإشعارات.'),
-          ),
-          const SizedBox(height: 18),
-          Center(
-            child: Text(
-              'Roqksa • الإصدار التجريبي',
-              style: TextStyle(color: Colors.white.withValues(alpha: .38), fontSize: 11),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.fromLTRB(10, 18, 10, 17),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: actions.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4, mainAxisSpacing: 17, crossAxisSpacing: 5, childAspectRatio: .78,
+                ),
+                itemBuilder: (context, index) {
+                  final item = actions[index];
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => _showInfo(item.title, item.message),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(
+                        width: 68, height: 68,
+                        decoration: BoxDecoration(color: item.color.withValues(alpha: .14), borderRadius: BorderRadius.circular(23)),
+                        child: Icon(item.icon, color: item.color, size: 39),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(item.title, maxLines: 2, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: ink, fontSize: 12, fontWeight: FontWeight.w800)),
+                    ]),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Container(
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+              child: Column(children: [
+                menuRow(Icons.card_giftcard_rounded, 'تفاصيل الهدايا', () => _showInfo('تفاصيل الهدايا', 'سجل الهدايا سيظهر هنا بعد ربط خدمة الهدايا.')),
+                const Divider(height: 1, indent: 18, endIndent: 18, color: Color(0xFFF0F0F0)),
+                menuRow(Icons.person_add_alt_1_rounded, 'دعوة الصديق', () => _showInfo('دعوة الصديق', 'سيتم إضافة رابط دعوة خاص بك ومتابعة الدعوات هنا.')),
+                const Divider(height: 1, indent: 18, endIndent: 18, color: Color(0xFFF0F0F0)),
+                menuRow(Icons.visibility_outlined, 'من زارني', () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileVisitorsScreen()))),
+                const Divider(height: 1, indent: 18, endIndent: 18, color: Color(0xFFF0F0F0)),
+                menuRow(Icons.article_outlined, 'منشوراتي', () => _showInfo('منشوراتي', 'ستظهر منشوراتك هنا بعد تفعيل خدمة المنشورات.')),
+                const Divider(height: 1, indent: 18, endIndent: 18, color: Color(0xFFF0F0F0)),
+                menuRow(Icons.settings_outlined, 'الإعدادات', () => _showInfo('الإعدادات', 'إعدادات الحساب والخصوصية والأمان.')),
+              ]),
+            ),
+            const SizedBox(height: 18),
+            const Center(child: Text('Roqksa', style: TextStyle(color: muted, fontSize: 12))),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _ProfilePill extends StatelessWidget {
+  const _ProfilePill({required this.icon, required this.label, required this.color});
+  final IconData icon;
+  final String label;
+  final Color color;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(18)),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, size: 14, color: Colors.white), const SizedBox(width: 4),
+      Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)),
+    ]),
+  );
+}
+
+class _MembershipCard extends StatelessWidget {
+  const _MembershipCard({required this.title, required this.icon, required this.color, required this.onTap});
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(17),
+    child: Container(
+      height: 100, padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(17)),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Icon(icon, size: 48, color: const Color(0xFF98612F)),
+        Text(title, style: const TextStyle(color: Color(0xFF784628), fontSize: 19, fontWeight: FontWeight.w900)),
+      ]),
+    ),
+  );
 }
 
 class _IdentityBadge extends StatelessWidget {
