@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'profile_visitors_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -218,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: 'من الذي رأني',
             subtitle: 'اعرف من زار ملفك الشخصي',
             color: const Color(0xFF5DE0D7),
-            onTap: () => _showInfo('من الذي رأني', 'ستظهر هنا قائمة زوار ملفك وأوقات الزيارة بعد ربط ميزة الزيارات بقاعدة البيانات.'),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileVisitorsScreen())),
           ),
           _ProfileMenuTile(
             icon: Icons.article_outlined,
