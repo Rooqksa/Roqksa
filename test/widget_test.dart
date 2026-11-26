@@ -189,7 +189,7 @@ void main() {
 
  
   testWidgets('room controls update local mic, seat request and likes', (tester) async {
-    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
 
     await tester.pumpWidget(const MaterialApp(
