@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -17,6 +19,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _nameController = TextEditingController();
   bool _isCreatingAccount = false;
   bool _hidePassword = true;
+  bool _isLoading = false;
 
   static const _purple = Color(0xFF27D7D0);
   static const _gold = Color(0xFFFFC86B);
@@ -30,18 +33,77 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
-  void _continueDemo() {
-    if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'هذه معاينة تجريبية فقط؛ لم يتم إنشاء حساب أو تسجيل الدخول فعلياً.',
-        ),
-      ),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+  Future<void> _continueWithFirebase() async {
+    if (_isLoading || !_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      final credential = _isCreatingAccount
+          ? await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: email,
+              password: password,
+            )
+          : await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: email,
+              password: password,
+            );
+
+      final user = credential.user;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'تعذر إنشاء جلسة المستخدم.',
+        );
+      }
+
+      if (_isCreatingAccount) {
+        final displayName = _nameController.text.trim();
+        await user.updateDisplayName(displayName);
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'displayName': displayName,
+          'photoUrl': null,
+          'bio': '',
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) return;
+      final message = switch (error.code) {
+        'invalid-email' => 'البريد الإلكتروني غير صحيح.',
+        'user-disabled' => 'هذا الحساب موقوف.',
+        'user-not-found' || 'wrong-password' || 'invalid-credential' =>
+          'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+        'email-already-in-use' => 'هذا البريد مسجل مسبقاً. سجّل الدخول بدلاً من ذلك.',
+        'weak-password' => 'اختر كلمة مرور أقوى من 6 أحرف.',
+        'too-many-requests' => 'محاولات كثيرة. حاول مرة أخرى لاحقاً.',
+        'network-request-failed' => 'تحقق من اتصال الإنترنت وحاول مجدداً.',
+        _ => 'تعذر تسجيل الدخول حالياً (${error.code}).',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } on FirebaseException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر حفظ بيانات الحساب: ${error.message ?? error.code}')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حدث خطأ غير متوقع. حاول مرة أخرى.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -198,15 +260,21 @@ class _AuthScreenState extends State<AuthScreen> {
                       SizedBox(
                         height: 52,
                         child: FilledButton(
-                          onPressed: _continueDemo,
+                          onPressed: _isLoading ? null : _continueWithFirebase,
                           style: FilledButton.styleFrom(
                             backgroundColor: _purple,
                             foregroundColor: Colors.white,
                           ),
-                          child: Text(
-                            _isCreatingAccount ? 'إنشاء حساب تجريبي' : 'دخول تجريبي',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(
+                                  _isCreatingAccount ? 'إنشاء حساب' : 'تسجيل الدخول',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -237,7 +305,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             SizedBox(width: 9),
                             Expanded(
                               child: Text(
-                                'تسجيل الدخول وإنشاء الحساب هنا للمعاينة فقط. سيتم تفعيل الحسابات الحقيقية بعد ربط Firebase Authentication.',
+                                'تسجيل الحسابات يتم عبر Firebase Authentication، وتُحفظ بيانات الملف الشخصي في Firestore.',
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
