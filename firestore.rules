@@ -9,6 +9,26 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    function areAcceptedFriends(ownerId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/friendships/$(ownerId)/friends/$(request.auth.uid))
+        && get(/databases/$(database)/documents/friendships/$(ownerId)/friends/$(request.auth.uid)).data.status == 'accepted'
+        && exists(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(ownerId))
+        && get(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(ownerId)).data.status == 'accepted';
+    }
+
+    function canReadStatus() {
+      return signedIn()
+        && (
+          resource.data.ownerId == request.auth.uid
+          || resource.data.visibility == 'public'
+          || (resource.data.visibility == 'friends'
+            && areAcceptedFriends(resource.data.ownerId))
+          || (resource.data.visibility == 'selected'
+            && request.auth.uid in resource.data.allowedUserIds)
+        );
+    }
+
     function isConversationMember(conversationId) {
       return signedIn()
         && exists(/databases/$(database)/documents/conversations/$(conversationId))
@@ -30,11 +50,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Friendship records are trusted-server managed. Clients cannot grant
+    // themselves friend status by writing an "accepted" relationship.
+    match /friendships/{uid}/friends/{friendUid} {
+      allow read: if isSelf(uid);
+      allow write: if false;
+    }
+
     match /conversations/{conversationId} {
       allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
       allow create: if signedIn()
-        && request.auth.uid in request.resource.data.memberIds
         && request.resource.data.memberIds is list
+        && request.auth.uid in request.resource.data.memberIds
         && request.resource.data.memberIds.size() >= 2
         && request.resource.data.memberIds.size() <= 50;
       allow update: if signedIn()
@@ -59,12 +86,33 @@ service cloud.firestore {
     }
 
     match /statuses/{statusId} {
-      allow read: if signedIn();
+      allow read: if canReadStatus();
       allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'ownerId', 'text', 'mediaUrl', 'mediaType',
+          'visibility', 'allowedUserIds', 'expiresAt', 'createdAt'
+        ])
         && request.resource.data.ownerId == request.auth.uid
-        && request.resource.data.expiresAt is timestamp;
-      // Status content and ownership are immutable from clients. Owners may
-      // remove their own status; expiry and view counters are backend-managed.
+        && request.resource.data.visibility in ['public', 'friends', 'selected']
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.allowedUserIds is list
+        && request.resource.data.allowedUserIds.size() <= 100
+        && (
+          (request.resource.data.visibility == 'selected'
+            && request.resource.data.allowedUserIds.size() > 0)
+          || (request.resource.data.visibility != 'selected'
+            && request.resource.data.allowedUserIds.size() == 0)
+        )
+        && (
+          !('text' in request.resource.data)
+          || (request.resource.data.text is string
+            && request.resource.data.text.size() <= 180)
+        )
+        && (
+          !('mediaUrl' in request.resource.data)
+          || request.resource.data.mediaUrl is string
+        );
+      // Status content and privacy are immutable after publication.
       allow update: if false;
       allow delete: if signedIn()
         && resource.data.ownerId == request.auth.uid;
