@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roqksa/main.dart';
+import 'package:roqksa/screens/game_screen.dart';
 
 void main() {
   testWidgets('Roqksa demo sign-in opens profile and messages tabs', (tester) async {
@@ -137,5 +138,26 @@ void main() {
     expect(find.text('مستخدم جديد'), findsOneWidget);
     expect(find.text('عضو Roqksa'), findsNothing);
   });
+
+
+  testWidgets('million quiz ends after the final question and can restart', (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: GameScreen(gameName: 'من سيربح المليون؟', gameIndex: 5),
+    ));
+
+    expect(find.text('السؤال 1 من 5'), findsOneWidget);
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byType(OutlinedButton).first);
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('انتهت المسابقة!'), findsOneWidget);
+    expect(find.text('السؤال 6'), findsNothing);
+
+    await tester.tap(find.text('العب من جديد'));
+    await tester.pumpAndSettle();
+    expect(find.text('السؤال 1 من 5'), findsOneWidget);
+  });
+
 
 }
