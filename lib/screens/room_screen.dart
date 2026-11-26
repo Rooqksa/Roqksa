@@ -37,8 +37,8 @@ class _RoomScreenState extends State<RoomScreen> {
     {'name': 'مقعد فارغ', 'icon': Icons.add, 'host': false},
   ];
 
-  static const gold = Color(0xFFE9BD68);
-  static const background = Color(0xFF10101E);
+  static const gold = Color(0xFFFFC86B);
+  static const background = Color(0xFF101C2B);
 
   void openChat() {
     final controller = TextEditingController();
@@ -46,7 +46,7 @@ class _RoomScreenState extends State<RoomScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF201D2C),
+      backgroundColor: const Color(0xFF192A3B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
@@ -130,7 +130,7 @@ class _RoomScreenState extends State<RoomScreen> {
   void _showRoomDetails() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF201D2C),
+      backgroundColor: const Color(0xFF192A3B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
@@ -169,7 +169,7 @@ class _RoomScreenState extends State<RoomScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF201D2C),
+      backgroundColor: const Color(0xFF192A3B),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
@@ -273,7 +273,7 @@ class _RoomScreenState extends State<RoomScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 18),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF252235).withValues(alpha: .94),
+        color: const Color(0xFF20364A).withValues(alpha: .94),
         borderRadius: BorderRadius.circular(17),
         border: Border.all(color: gold.withValues(alpha: .35)),
       ),
@@ -438,7 +438,7 @@ class _RoomScreenState extends State<RoomScreen> {
       margin: const EdgeInsets.fromLTRB(15, 0, 15, 8),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF252235),
+        color: const Color(0xFF20364A),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -466,7 +466,7 @@ class _RoomScreenState extends State<RoomScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 12, 10, 18),
       decoration: const BoxDecoration(
-        color: Color(0xFF201D2C),
+        color: Color(0xFF192A3B),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         border: Border(top: BorderSide(color: Color(0xFF5B4934))),
       ),
@@ -523,7 +523,7 @@ class _RoomDetailRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFFE9BD68), size: 20),
+          Icon(icon, color: const Color(0xFFFFC86B), size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(label, style: const TextStyle(color: Colors.white70)),
@@ -540,7 +540,7 @@ class _RoomButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.color = const Color(0xFFE9BD68),
+    this.color = const Color(0xFFFFC86B),
   });
 
   final IconData icon;
@@ -589,7 +589,7 @@ class _StarBackground extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Color(0xFF171629),
-              Color(0xFF10101E),
+              Color(0xFF101C2B),
               Color(0xFF171321),
             ],
           ),
