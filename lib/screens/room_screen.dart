@@ -14,6 +14,21 @@ class _RoomScreenState extends State<RoomScreen> {
   int likes = 128;
   int selectedSeat = -1;
   int requestedSeat = -1;
+  final TextEditingController _roomMessageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _roomMessageController.dispose();
+    super.dispose();
+  }
+
+  void _sendRoomMessage() {
+    final message = _roomMessageController.text.trim();
+    if (message.isEmpty) return;
+    setState(() => messages.add(message));
+    _roomMessageController.clear();
+    FocusScope.of(context).unfocus();
+  }
 
   final List<String> messages = [
     'أهلاً بالجميع في روكسا ❤️',
@@ -274,28 +289,61 @@ class _RoomScreenState extends State<RoomScreen> {
     },
   );
 
-  Widget _buildChatPreview() => InkWell(
-    onTap: openChat,
-    child: Container(
-      height: 43, margin: const EdgeInsets.fromLTRB(14, 0, 14, 7), padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(color: const Color(0xFF282044), borderRadius: BorderRadius.circular(15), border: Border.all(color: Colors.white.withValues(alpha: .07))),
-      child: Row(children: [
-        const Icon(Icons.chat_bubble_rounded, color: aqua, size: 17),
-        const SizedBox(width: 8),
-        Expanded(child: Text(messages.isEmpty ? 'ابدأ الدردشة...' : messages.last, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white70, fontSize: 10))),
-        const Text('الدردشة', style: TextStyle(color: aqua, fontSize: 10, fontWeight: FontWeight.bold)),
-        const SizedBox(width: 4),
-        const Icon(Icons.chevron_left_rounded, color: aqua, size: 17),
-      ]),
+  Widget _buildChatPreview() => Container(
+    margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+    decoration: BoxDecoration(
+      color: const Color(0xFF282044),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: aqua.withValues(alpha: .22)),
+      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .14), blurRadius: 12, offset: const Offset(0, 3))],
     ),
+    child: Row(children: [
+      Material(
+        color: const Color(0xFF3A2C60),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: openGifts,
+          child: const SizedBox(width: 39, height: 39, child: Icon(Icons.card_giftcard_rounded, color: Color(0xFFFFC96B), size: 21)),
+        ),
+      ),
+      const SizedBox(width: 8),
+      Expanded(
+        child: TextField(
+          controller: _roomMessageController,
+          textDirection: TextDirection.rtl,
+          textInputAction: TextInputAction.send,
+          onSubmitted: (_) => _sendRoomMessage(),
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          decoration: InputDecoration(
+            hintText: 'اكتب رسالة للأصدقاء...',
+            hintStyle: const TextStyle(color: Colors.white54, fontSize: 12),
+            isDense: true,
+            filled: true,
+            fillColor: const Color(0xFF1D1833),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+          ),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Material(
+        color: aqua,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: _sendRoomMessage,
+          child: const SizedBox(width: 39, height: 39, child: Icon(Icons.send_rounded, color: Color(0xFF172A35), size: 19)),
+        ),
+      ),
+    ]),
   );
 
   Widget _buildControls() => Container(
     padding: const EdgeInsets.fromLTRB(8, 10, 8, 13),
     decoration: BoxDecoration(color: const Color(0xFF201936), borderRadius: const BorderRadius.vertical(top: Radius.circular(23)), border: Border(top: BorderSide(color: Colors.white.withValues(alpha: .08)))),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-      _RoomButton(icon: Icons.chat_rounded, label: 'الدردشة', onTap: openChat),
-      _RoomButton(icon: Icons.card_giftcard_rounded, label: 'الهدايا', onTap: openGifts),
+    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       _RoomButton(icon: Icons.favorite_rounded, label: '$likes', color: const Color(0xFFFF6D9B), onTap: () => setState(() => likes++)),
       _RoomButton(icon: micRequested ? Icons.mic_rounded : Icons.mic_none_rounded, label: micRequested ? 'إلغاء الطلب' : 'طلب المايك', color: aqua, onTap: () => setState(() => micRequested = !micRequested)),
       _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', onTap: () => Navigator.pop(context)),
