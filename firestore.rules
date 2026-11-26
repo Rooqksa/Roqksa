@@ -35,13 +35,33 @@ service cloud.firestore {
         && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.memberIds;
     }
 
+    // Private account data: only the account owner can read it.
     match /users/{uid} {
-      allow read: if signedIn();
+      allow read: if isSelf(uid);
       allow create: if isSelf(uid)
         && request.resource.data.keys().hasOnly([
           'uid', 'displayName', 'photoUrl', 'bio', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == uid;
+      allow update: if isSelf(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'photoUrl', 'bio', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Public profile contains only safe display fields; counters are server-owned.
+    match /publicProfiles/{uid} {
+      allow read: if signedIn();
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly([
+          'uid', 'displayName', 'photoUrl', 'bio',
+          'giftsCount', 'postsCount', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.giftsCount == 0
+        && request.resource.data.postsCount == 0;
       allow update: if isSelf(uid)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
