@@ -187,8 +187,8 @@ void main() {
 
  
   testWidgets('room controls update local mic, seat request and likes', (tester) async {
-    await tester.view.setPhysicalSize(const Size(1080, 1920));
-    await tester.view.setDevicePixelRatio(1);
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1;
 
     await tester.pumpWidget(const MaterialApp(
       home: RoomScreen(roomName: 'غرفة الاختبار'),
@@ -208,8 +208,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
 
-    await tester.view.resetPhysicalSize();
-    await tester.view.resetDevicePixelRatio();
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
   });
  
 }
