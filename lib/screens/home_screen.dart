@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 9),
               const Text(
                 'ادخل غرفة صوتية، شارك لحظتك، وتعرّف على أصدقاء جدد',
-                style: TextStyle(color: Colors.white.withValues(alpha: .82), height: 1.45, fontSize: 13),
+                style: TextStyle(color: Color(0xD1FFFFFF), height: 1.45, fontSize: 13),
               ),
               const SizedBox(height: 19),
               Row(
