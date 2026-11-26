@@ -73,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }, SetOptions(merge: true));
       batch.set(FirebaseFirestore.instance.collection('publicProfiles').doc(user.uid), {
         'uid': user.uid, 'displayName': result.name, 'bio': result.bio,
-        'country': result.country, 'hideCountry': result.hideCountry,
+        'country': result.hideCountry ? null : result.country, 'hideCountry': result.hideCountry,
         'updatedAt': now,
       }, SetOptions(merge: true));
       await batch.commit();
