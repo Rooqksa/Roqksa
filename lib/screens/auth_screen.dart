@@ -61,14 +61,28 @@ class _AuthScreenState extends State<AuthScreen> {
       if (_isCreatingAccount) {
         final displayName = _nameController.text.trim();
         await user.updateDisplayName(displayName);
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        final firestore = FirebaseFirestore.instance;
+        final batch = firestore.batch();
+        final now = FieldValue.serverTimestamp();
+        batch.set(firestore.collection('users').doc(user.uid), {
           'uid': user.uid,
           'displayName': displayName,
           'photoUrl': null,
           'bio': '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'createdAt': now,
+          'updatedAt': now,
         });
+        batch.set(firestore.collection('publicProfiles').doc(user.uid), {
+          'uid': user.uid,
+          'displayName': displayName,
+          'photoUrl': null,
+          'bio': '',
+          'giftsCount': 0,
+          'postsCount': 0,
+          'createdAt': now,
+          'updatedAt': now,
+        });
+        await batch.commit();
       }
 
       if (!mounted) return;
