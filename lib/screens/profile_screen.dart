@@ -387,10 +387,21 @@ class _IdentityBadge extends StatelessWidget {
 }
 
 class _ProfileEditResult {
-  const _ProfileEditResult({required this.name, required this.bio});
+  const _ProfileEditResult({
+    required this.name,
+    required this.bio,
+    required this.country,
+    required this.hideCountry,
+    required this.age,
+    required this.gender,
+  });
 
   final String name;
   final String bio;
+  final String country;
+  final bool hideCountry;
+  final int? age;
+  final String? gender;
 }
 
 class _ProfileEditDialog extends StatefulWidget {
