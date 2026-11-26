@@ -30,7 +30,7 @@ class RoomCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.white.withValues(alpha: .09)),
+              border: Border.all(color: const Color(0xFF67DCD7).withValues(alpha: .20)),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
