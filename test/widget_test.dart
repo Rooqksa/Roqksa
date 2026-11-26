@@ -198,19 +198,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('غرفة الاختبار'), findsOneWidget);
-    await tester.tap(find.text('طلب المايك'));
+    await tester.tap(find.text('ميكروفون'));
     await tester.pumpAndSettle();
-    expect(find.text('إلغاء الطلب'), findsOneWidget);
+    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
 
     await tester.tap(find.text('مقعد فارغ').first);
     await tester.pumpAndSettle();
     expect(find.text('بانتظار الموافقة'), findsOneWidget);
 
-    // Let the seat-request SnackBar disappear so it cannot cover the bottom controls.
+    // Let the seat-request SnackBar disappear before using the room controls.
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.favorite));
+    await tester.tap(find.text('إعجاب'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('المزيد'));
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
 
