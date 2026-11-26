@@ -38,18 +38,17 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import shutil
           candidates = [
               Path("android/app/build.gradle"),
               Path("android/app/build.gradle.kts"),
           ]
           found = False
           for path in candidates:
-              if not path.exists():
-                  continue
-              text = path.read_text()
-              text = text.replace('com.roqksa.roqksa', 'com.roqksa.app')
-              path.write_text(text)
-              found = True
+              if path.exists():
+                  text = path.read_text().replace('com.roqksa.roqksa', 'com.roqksa.app')
+                  path.write_text(text)
+                  found = True
           if not found:
               raise SystemExit("Android app Gradle file was not generated")
           old = Path("android/app/src/main/kotlin/com/roqksa/roqksa")
@@ -57,10 +56,8 @@ jobs:
           if old.exists():
               new.mkdir(parents=True, exist_ok=True)
               for file in old.iterdir():
-                  source = file.read_text()
-                  source = source.replace('package com.roqksa.roqksa', 'package com.roqksa.app')
+                  source = file.read_text().replace('package com.roqksa.roqksa', 'package com.roqksa.app')
                   (new / file.name).write_text(source)
-              import shutil
               shutil.rmtree(old)
           manifest = Path("android/app/src/main/AndroidManifest.xml")
           if manifest.exists():
