@@ -121,6 +121,21 @@ class _RoomScreenState extends State<RoomScreen> {
           const _RoomDetailRow(icon: Icons.people_alt_outlined, label: 'المقاعد', value: '12 مقعداً'),
           const _RoomDetailRow(icon: Icons.headphones_rounded, label: 'المستمعون', value: '128 مستمعاً'),
           _RoomDetailRow(icon: Icons.favorite_border_rounded, label: 'الإعجابات', value: '$likes'),
+          const SizedBox(height: 8),
+          SizedBox(width: double.infinity, child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFD5B5FF),
+              side: const BorderSide(color: Color(0xFF8B22FF)),
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            onPressed: () {
+              Navigator.pop(sheetContext);
+              Future<void>.delayed(const Duration(milliseconds: 220), _showSeatLayoutPicker);
+            },
+            icon: const Icon(Icons.dashboard_customize_rounded),
+            label: const Text('تغيير شكل المقاعد'),
+          )),
           const SizedBox(height: 12),
           const Text('الأرقام والتفاعلات المعروضة حالياً تجريبية ومحلية.', style: TextStyle(color: Colors.white54, fontSize: 11)),
         ]),
@@ -163,7 +178,6 @@ class _RoomScreenState extends State<RoomScreen> {
         SafeArea(child: Column(children: [
           _buildHeader(),
           _buildRoomBanner(),
-          _buildSeatLayoutButton(),
           Expanded(child: _buildSeats()),
           _buildChatPreview(),
           _buildControls(),
@@ -220,32 +234,6 @@ class _RoomScreenState extends State<RoomScreen> {
       ])),
       Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF8D19F5), Color(0xFF4B0DA8)]), borderRadius: BorderRadius.circular(22)), child: const Column(children: [Row(children: [Icon(Icons.circle, color: Color(0xFF38F18D), size: 7), SizedBox(width: 5), Text('مباشر', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))]), SizedBox(height: 3), Text('00:24:17', style: TextStyle(color: Colors.white, fontSize: 10))])),
     ]),
-  );
-
-  Widget _buildSeatLayoutButton() => Padding(
-    padding: const EdgeInsets.fromLTRB(14, 0, 14, 5),
-    child: Align(
-      alignment: Alignment.centerRight,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: _showSeatLayoutPicker,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          decoration: BoxDecoration(
-            color: const Color(0xFF32145B),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: violet.withValues(alpha: .65)),
-          ),
-          child: const Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.dashboard_customize_rounded, color: Color(0xFFD5B5FF), size: 16),
-            SizedBox(width: 6),
-            Text('تغيير شكل المقاعد', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-            SizedBox(width: 4),
-            Icon(Icons.expand_more_rounded, color: Colors.white70, size: 16),
-          ]),
-        ),
-      ),
-    ),
   );
 
   void _showSeatLayoutPicker() {
