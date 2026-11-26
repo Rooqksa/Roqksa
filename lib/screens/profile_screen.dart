@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'profile_visitors_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -15,6 +17,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String displayName = 'عضو Roqksa';
   String bio = 'أهلاً بكم في عالمي الصوتي ❤️';
   String country = 'السعودية';
+  int? age;
+  String? gender;
+  bool hideCountry = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final privateDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final publicDoc = await FirebaseFirestore.instance.collection('publicProfiles').doc(user.uid).get();
+      final privateData = privateDoc.data() ?? {};
+      final publicData = publicDoc.data() ?? {};
+      if (!mounted) return;
+      setState(() {
+        displayName = (privateData['displayName'] ?? publicData['displayName'] ?? displayName) as String;
+        bio = (privateData['bio'] ?? publicData['bio'] ?? bio) as String;
+        country = (publicData['country'] ?? privateData['country'] ?? country) as String;
+        hideCountry = (publicData['hideCountry'] ?? privateData['hideCountry'] ?? false) as bool;
+        age = privateData['age'] as int?;
+        gender = privateData['gender'] as String?;
+      });
+    } catch (_) {}
+  }
 
   Future<void> _editProfile() async {
     final result = await showDialog<_ProfileEditResult>(
@@ -22,14 +53,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => _ProfileEditDialog(
         initialName: displayName,
         initialBio: bio,
+        initialCountry: country,
+        initialHideCountry: hideCountry,
+        initialAge: age,
+        initialGender: gender,
       ),
     );
 
-    if (result != null && mounted) {
+    if (result == null || !mounted) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      final batch = FirebaseFirestore.instance.batch();
+      final now = FieldValue.serverTimestamp();
+      batch.set(FirebaseFirestore.instance.collection('users').doc(user.uid), {
+        'uid': user.uid, 'displayName': result.name, 'bio': result.bio,
+        'country': result.country, 'hideCountry': result.hideCountry,
+        'age': result.age, 'gender': result.gender, 'updatedAt': now,
+      }, SetOptions(merge: true));
+      batch.set(FirebaseFirestore.instance.collection('publicProfiles').doc(user.uid), {
+        'uid': user.uid, 'displayName': result.name, 'bio': result.bio,
+        'country': result.country, 'hideCountry': result.hideCountry,
+        'updatedAt': now,
+      }, SetOptions(merge: true));
+      await batch.commit();
+      if (!mounted) return;
       setState(() {
-        displayName = result.name;
-        bio = result.bio;
+        displayName = result.name; bio = result.bio; country = result.country;
+        hideCountry = result.hideCountry; age = result.age; gender = result.gender;
       });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حفظ بيانات الحساب.')));
+    } on FirebaseException catch (error) {
+      if (mounted) _showInfo('تعذر الحفظ', 'راجع صلاحيات قاعدة البيانات: ${error.code}');
     }
   }
 
@@ -124,10 +179,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 15, color: gold),
-                    const SizedBox(width: 4),
-                    Text(country, style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                    const SizedBox(width: 12),
+                    if (!hideCountry) ...[
+                      const Icon(Icons.location_on_outlined, size: 15, color: gold),
+                      const SizedBox(width: 4),
+                      Text(country, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                      const SizedBox(width: 12),
+                    ],
                     const Icon(Icons.verified_user_outlined, size: 15, color: gold),
                     const SizedBox(width: 4),
                     const Text('حساب تجريبي', style: TextStyle(color: Colors.white70, fontSize: 12)),
@@ -340,10 +397,16 @@ class _ProfileEditDialog extends StatefulWidget {
   const _ProfileEditDialog({
     required this.initialName,
     required this.initialBio,
+    required this.initialCountry,
+    required this.initialHideCountry,
+    required this.initialAge,
+    required this.initialGender,
   });
 
-  final String initialName;
-  final String initialBio;
+  final String initialName, initialBio, initialCountry;
+  final bool initialHideCountry;
+  final int? initialAge;
+  final String? initialGender;
 
   @override
   State<_ProfileEditDialog> createState() => _ProfileEditDialogState();
@@ -352,6 +415,10 @@ class _ProfileEditDialog extends StatefulWidget {
 class _ProfileEditDialogState extends State<_ProfileEditDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _bioController;
+  late final TextEditingController _ageController;
+  late String _country;
+  late bool _hideCountry;
+  String? _gender;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -359,12 +426,17 @@ class _ProfileEditDialogState extends State<_ProfileEditDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
     _bioController = TextEditingController(text: widget.initialBio);
+    _ageController = TextEditingController(text: widget.initialAge?.toString() ?? '');
+    _country = widget.initialCountry;
+    _hideCountry = widget.initialHideCountry;
+    _gender = widget.initialGender;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _bioController.dispose();
+    _ageController.dispose();
     super.dispose();
   }
 
@@ -397,6 +469,43 @@ class _ProfileEditDialogState extends State<_ProfileEditDialog> {
                 maxLength: 80,
                 decoration: const InputDecoration(labelText: 'النبذة الشخصية'),
               ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _country,
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'البلد'),
+                items: const ['السعودية','الإمارات','الكويت','قطر','البحرين','عُمان','مصر','العراق','الأردن','لبنان','المغرب','الجزائر','تونس','اليمن','السودان','فلسطين','سوريا','تركيا','أخرى']
+                  .map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                onChanged: (v) { if (v != null) setState(() => _country = v); },
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('إخفاء البلد عن الآخرين'),
+                value: _hideCountry,
+                onChanged: (v) => setState(() => _hideCountry = v),
+              ),
+              TextFormField(
+                controller: _ageController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'العمر'),
+                validator: (v) {
+                  final raw = v?.trim() ?? '';
+                  if (raw.isEmpty) return null;
+                  final n = int.tryParse(raw);
+                  if (n == null || n < 13 || n > 120) return 'أدخل عمراً صحيحاً من 13 إلى 120';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _gender,
+                decoration: const InputDecoration(labelText: 'الجنس'),
+                items: const [
+                  DropdownMenuItem(value: 'ذكر', child: Text('ذكر')),
+                  DropdownMenuItem(value: 'أنثى', child: Text('أنثى')),
+                ],
+                onChanged: (v) => setState(() => _gender = v),
+              ),
             ],
           ),
         ),
@@ -413,6 +522,10 @@ class _ProfileEditDialogState extends State<_ProfileEditDialog> {
                   _ProfileEditResult(
                     name: _nameController.text.trim(),
                     bio: _bioController.text.trim(),
+                    country: _country,
+                    hideCountry: _hideCountry,
+                    age: int.tryParse(_ageController.text.trim()),
+                    gender: _gender,
                   ),
                 );
               }
