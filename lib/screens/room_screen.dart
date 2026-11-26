@@ -15,6 +15,8 @@ class _RoomScreenState extends State<RoomScreen> {
   int selectedSeat = -1;
   int requestedSeat = -1;
   int seatLayout = 0; // 0: اثنان بالأعلى، 1: المضيف بالمنتصف، 2: صف أفقي
+  bool speakerEnabled = true;
+  bool emojiPanelOpen = false;
   final TextEditingController _roomMessageController = TextEditingController();
 
   @override
@@ -392,67 +394,184 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
 
-  Widget _buildChatPreview() => Container(
-    margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-    decoration: BoxDecoration(
-      color: const Color(0xFF282044),
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: aqua.withValues(alpha: .22)),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .14), blurRadius: 12, offset: const Offset(0, 3))],
-    ),
-    child: Row(children: [
-      Material(
-        color: const Color(0xFF3A2C60),
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: openGifts,
-          child: const SizedBox(width: 39, height: 39, child: Icon(Icons.card_giftcard_rounded, color: Color(0xFFFFC96B), size: 21)),
+  void _showRoomMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF211A3D),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(width: 42, height: 4, decoration: BoxDecoration(color: Colors.white30, borderRadius: BorderRadius.circular(4))),
+            const SizedBox(height: 14),
+            const Text('خيارات الغرفة', style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            GridView.count(
+              shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 3, childAspectRatio: 1.18, mainAxisSpacing: 8, crossAxisSpacing: 8,
+              children: [
+                _RoomMenuTile(icon: Icons.dashboard_customize_rounded, title: 'شكل المقاعد', onTap: () { Navigator.pop(sheetContext); _showSeatLayoutPicker(); }),
+                _RoomMenuTile(icon: Icons.people_alt_rounded, title: 'أعضاء الغرفة', onTap: () { Navigator.pop(sheetContext); _showRoomMembers(); }),
+                _RoomMenuTile(icon: Icons.info_outline_rounded, title: 'معلومات الغرفة', onTap: () { Navigator.pop(sheetContext); _showRoomDetails(); }),
+                _RoomMenuTile(icon: Icons.card_giftcard_rounded, title: 'الهدايا', onTap: () { Navigator.pop(sheetContext); openGifts(); }),
+                _RoomMenuTile(icon: Icons.favorite_rounded, title: 'إرسال إعجاب', onTap: () { setState(() => likes++); Navigator.pop(sheetContext); }),
+                _RoomMenuTile(icon: Icons.share_rounded, title: 'مشاركة', onTap: () { Navigator.pop(sheetContext); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('مشاركة الغرفة ستتاح عند ربط المشاركة'))); }),
+                _RoomMenuTile(icon: Icons.volume_off_rounded, title: speakerEnabled ? 'كتم الصوت' : 'تشغيل الصوت', onTap: () { setState(() => speakerEnabled = !speakerEnabled); Navigator.pop(sheetContext); }),
+                _RoomMenuTile(icon: Icons.settings_rounded, title: 'إعدادات الغرفة', onTap: () { Navigator.pop(sheetContext); _showRoomDetails(); }),
+                _RoomMenuTile(icon: Icons.flag_outlined, title: 'الإبلاغ', onTap: () { Navigator.pop(sheetContext); ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('سيتم تفعيل الإبلاغ بعد ربطه بالخادم'))); }),
+              ],
+            ),
+          ]),
         ),
       ),
-      const SizedBox(width: 8),
+    );
+  }
+
+  void _showRoomMembers() {
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: const Color(0xFF211A3D),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) => SafeArea(child: ListView(
+        shrinkWrap: true, padding: const EdgeInsets.all(18),
+        children: [
+          const Text('أعضاء الغرفة والمقاعد', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+          const SizedBox(height: 12),
+          ...seats.asMap().entries.map((entry) => ListTile(
+            leading: CircleAvatar(backgroundColor: const Color(0xFF3A2C60), child: Icon(entry.value['icon'] as IconData, color: aqua)),
+            title: Text(entry.value['name'] as String, style: const TextStyle(color: Colors.white)),
+            subtitle: Text(entry.key == 0 ? 'مضيف الغرفة' : entry.value['name'] == 'مقعد فارغ' ? 'مقعد متاح' : 'عضو في الغرفة', style: const TextStyle(color: Colors.white54)),
+            trailing: Text('S${entry.key + 1}', style: const TextStyle(color: aqua)),
+          )),
+        ],
+      )),
+    );
+  }
+
+  void _showEmojiPicker() {
+    const emojis = ['😀','😂','😍','🥰','😘','😎','😭','👏','👍','❤️','🔥','🌹','🎉','💎','👑','🦋','🤍','🙏','🤣','🥳'];
+    showModalBottomSheet<void>(
+      context: context, backgroundColor: const Color(0xFF211A3D),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) => Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Text('الرموز التعبيرية', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+          const SizedBox(height: 12),
+          GridView.count(
+            shrinkWrap: true, crossAxisCount: 5, childAspectRatio: 1.2,
+            children: emojis.map((emoji) => IconButton(
+              onPressed: () { _roomMessageController.text += emoji; _roomMessageController.selection = TextSelection.collapsed(offset: _roomMessageController.text.length); Navigator.pop(sheetContext); },
+              icon: Text(emoji, style: const TextStyle(fontSize: 27)),
+            )).toList(),
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildChatPreview() => Container(
+    height: 178,
+    margin: const EdgeInsets.fromLTRB(10, 0, 10, 7),
+    padding: const EdgeInsets.fromLTRB(9, 7, 9, 7),
+    decoration: BoxDecoration(
+      color: const Color(0xFF142E40).withValues(alpha: .78),
+      borderRadius: BorderRadius.circular(19),
+      border: Border.all(color: aqua.withValues(alpha: .22)),
+    ),
+    child: Column(children: [
       Expanded(
-        child: TextField(
-          controller: _roomMessageController,
-          textDirection: TextDirection.rtl,
-          textInputAction: TextInputAction.send,
-          onSubmitted: (_) => _sendRoomMessage(),
-          style: const TextStyle(color: Colors.white, fontSize: 13),
-          decoration: InputDecoration(
-            hintText: 'اكتب رسالة للأصدقاء...',
-            hintStyle: const TextStyle(color: Colors.white54, fontSize: 12),
-            isDense: true,
-            filled: true,
-            fillColor: const Color(0xFF1D1833),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+        child: messages.isEmpty
+          ? const Center(child: Text('ابدأ الحديث مع الموجودين في الغرفة', style: TextStyle(color: Colors.white54, fontSize: 11)))
+          : ListView.builder(
+              reverse: true, padding: EdgeInsets.zero,
+              itemCount: messages.length > 4 ? 4 : messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[messages.length - 1 - index];
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 5),
+                    child: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, height: 1.25)),
+                  ),
+                );
+              },
+            ),
+      ),
+      Row(children: [
+        _roomMiniButton(Icons.card_giftcard_rounded, 'الهدايا', openGifts),
+        _roomMiniButton(Icons.emoji_emotions_outlined, 'الرموز', _showEmojiPicker),
+        const SizedBox(width: 5),
+        Expanded(
+          child: TextField(
+            controller: _roomMessageController,
+            textDirection: TextDirection.rtl,
+            textInputAction: TextInputAction.send,
+            keyboardType: TextInputType.text,
+            autocorrect: true,
+            enableSuggestions: true,
+            onSubmitted: (_) => _sendRoomMessage(),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+            decoration: InputDecoration(
+              hintText: 'اكتب رسالة...',
+              hintStyle: const TextStyle(color: Colors.white60, fontSize: 12),
+              isDense: true, filled: true, fillColor: const Color(0xFF102638),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: aqua)),
+            ),
           ),
         ),
-      ),
-      const SizedBox(width: 7),
-      Material(
-        color: aqua,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: _sendRoomMessage,
-          child: const SizedBox(width: 39, height: 39, child: Icon(Icons.send_rounded, color: Color(0xFF172A35), size: 19)),
-        ),
-      ),
+        const SizedBox(width: 6),
+        _roomMiniButton(Icons.send_rounded, 'إرسال', _sendRoomMessage, filled: true),
+      ]),
     ]),
   );
 
+  Widget _roomMiniButton(IconData icon, String label, VoidCallback onTap, {bool filled = false}) => Tooltip(
+    message: label,
+    child: Material(
+      color: filled ? aqua : Colors.white.withValues(alpha: .10),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(), onTap: onTap,
+        child: SizedBox(width: 37, height: 37, child: Icon(icon, color: filled ? const Color(0xFF172A35) : Colors.white, size: 19)),
+      ),
+    ),
+  );
+
   Widget _buildControls() => Container(
-    padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-    decoration: BoxDecoration(color: const Color(0xFF201936), borderRadius: const BorderRadius.vertical(top: Radius.circular(23)), border: Border(top: BorderSide(color: Colors.white.withValues(alpha: .08)))),
+    padding: const EdgeInsets.fromLTRB(5, 7, 5, 9),
+    decoration: BoxDecoration(color: const Color(0xFF102A3A).withValues(alpha: .94), borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), border: Border(top: BorderSide(color: Colors.white.withValues(alpha: .10)))),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', color: Colors.white, onTap: () => Navigator.pop(context)),
-      _RoomButton(icon: Icons.favorite_rounded, label: 'إعجاب', color: Colors.white, onTap: () => setState(() => likes++)),
-      _RoomButton(icon: micRequested ? Icons.mic_rounded : Icons.mic_none_rounded, label: 'ميكروفون', color: const Color(0xFFB86BFF), onTap: () => setState(() => micRequested = !micRequested)),
-      _RoomButton(icon: Icons.share_rounded, label: 'مشاركة', color: Colors.white, onTap: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('مشاركة الغرفة قريباً')))),
-      _RoomButton(icon: Icons.more_horiz_rounded, label: 'المزيد', color: Colors.white, onTap: _showRoomDetails),
+      _RoomButton(icon: Icons.card_giftcard_rounded, label: 'هدايا', color: const Color(0xFFFFC96B), onTap: openGifts),
+      _RoomButton(icon: micRequested ? Icons.mic_rounded : Icons.mic_off_rounded, label: micRequested ? 'إلغاء الطلب' : 'طلب المايك', color: const Color(0xFFB86BFF), onTap: () { setState(() => micRequested = !micRequested); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(micRequested ? 'تم إرسال طلب المايك (واجهة تجريبية)' : 'تم إلغاء طلب المايك'))); }),
+      _RoomButton(icon: speakerEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: speakerEnabled ? 'الصوت' : 'صامت', color: Colors.white, onTap: () => setState(() => speakerEnabled = !speakerEnabled)),
+      _RoomButton(icon: Icons.more_horiz_rounded, label: 'الخيارات', color: Colors.white, onTap: _showRoomMenu),
     ]),
+  );
+}
+
+class _RoomMenuTile extends StatelessWidget {
+  const _RoomMenuTile({required this.icon, required this.title, required this.onTap});
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap, borderRadius: BorderRadius.circular(13),
+    child: Container(
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: .07), borderRadius: BorderRadius.circular(13)),
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Icon(icon, color: const Color(0xFFB78CFF), size: 24),
+        const SizedBox(height: 6),
+        Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10)),
+      ]),
+    ),
   );
 }
 
