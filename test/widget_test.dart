@@ -160,4 +160,28 @@ void main() {
   });
 
 
+
+  testWidgets('all six local game prototypes open their expected controls', (tester) async {
+    const games = [
+      ('كيرم', 0, 'اضرب القرص'),
+      ('لودو', 1, 'ارمِ النرد'),
+      ('جاكارو مجنونة', 2, 'ارمِ النرد'),
+      ('جاكارو عادية', 3, 'ارمِ النرد'),
+      ('كاندي', 4, 'كاندي: اجمع الحلوى'),
+      ('من سيربح المليون؟', 5, 'السؤال 1 من 5'),
+    ];
+
+    for (final game in games) {
+      await tester.pumpWidget(MaterialApp(
+        home: GameScreen(gameName: game.$1, gameIndex: game.$2),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('نسخة تجريبية محلية'), findsOneWidget,
+          reason: 'The local-play notice should appear in ${game.$1}.');
+      expect(find.text(game.$3), findsOneWidget,
+          reason: 'The expected game control should appear in ${game.$1}.');
+    }
+  });
+
 }
