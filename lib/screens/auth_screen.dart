@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -13,33 +15,109 @@ class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isCreatingAccount = false;
   bool _hidePassword = true;
+  bool _isLoading = false;
 
-  static const _purple = Color(0xFF9B72FF);
-  static const _gold = Color(0xFFE9BD68);
+  static const _purple = Color(0xFF27D7D0);
+  static const _gold = Color(0xFFFFC86B);
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
-  void _continueDemo() {
-    if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'هذه معاينة تجريبية فقط؛ لم يتم إنشاء حساب أو تسجيل الدخول فعلياً.',
-        ),
-      ),
-    );
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+  Future<void> _continueWithFirebase() async {
+    if (_isLoading || !_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      final credential = _isCreatingAccount
+          ? await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: email,
+              password: password,
+            )
+          : await FirebaseAuth.instance.signInWithEmailAndPassword(
+              email: email,
+              password: password,
+            );
+
+      final user = credential.user;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'تعذر إنشاء جلسة المستخدم.',
+        );
+      }
+
+      if (_isCreatingAccount) {
+        final displayName = _nameController.text.trim();
+        await user.updateDisplayName(displayName);
+        final firestore = FirebaseFirestore.instance;
+        final batch = firestore.batch();
+        final now = FieldValue.serverTimestamp();
+        batch.set(firestore.collection('users').doc(user.uid), {
+          'uid': user.uid,
+          'displayName': displayName,
+          'photoUrl': null,
+          'bio': '',
+          'createdAt': now,
+          'updatedAt': now,
+        });
+        batch.set(firestore.collection('publicProfiles').doc(user.uid), {
+          'uid': user.uid,
+          'displayName': displayName,
+          'photoUrl': null,
+          'bio': '',
+          'giftsCount': 0,
+          'postsCount': 0,
+          'createdAt': now,
+          'updatedAt': now,
+        });
+        await batch.commit();
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } on FirebaseAuthException catch (error) {
+      if (!mounted) return;
+      final message = switch (error.code) {
+        'invalid-email' => 'البريد الإلكتروني غير صحيح.',
+        'user-disabled' => 'هذا الحساب موقوف.',
+        'user-not-found' || 'wrong-password' || 'invalid-credential' =>
+          'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+        'email-already-in-use' => 'هذا البريد مسجل مسبقاً. سجّل الدخول بدلاً من ذلك.',
+        'weak-password' => 'اختر كلمة مرور أقوى من 6 أحرف.',
+        'too-many-requests' => 'محاولات كثيرة. حاول مرة أخرى لاحقاً.',
+        'network-request-failed' => 'تحقق من اتصال الإنترنت وحاول مجدداً.',
+        _ => 'تعذر تسجيل الدخول حالياً (${error.code}).',
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } on FirebaseException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر حفظ بيانات الحساب: ${error.message ?? error.code}')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('حدث خطأ غير متوقع. حاول مرة أخرى.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -64,7 +142,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [_purple, Color(0xFFCB78E8)],
+                            colors: [_purple, Color(0xFF5DE0D7)],
                           ),
                           borderRadius: BorderRadius.circular(24),
                         ),
@@ -115,6 +193,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        autofillHints: const [AutofillHints.email],
+                        autocorrect: false,
+                        enableSuggestions: false,
                         textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
                           labelText: 'البريد الإلكتروني',
@@ -123,7 +204,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                         validator: (value) {
                           final email = value?.trim() ?? '';
-                          if (!email.contains('@') || !email.contains('.')) {
+                          final validEmail = RegExp(
+                            r'^[^@ ]+@[^@ ]+[.][^@ ]+$',
+                          ).hasMatch(email);
+                          if (!validEmail) {
                             return 'أدخل بريداً إلكترونياً صحيحاً';
                           }
                           return null;
@@ -133,6 +217,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _hidePassword,
+                        autofillHints: [
+                          _isCreatingAccount
+                              ? AutofillHints.newPassword
+                              : AutofillHints.password,
+                        ],
+                        autocorrect: false,
+                        enableSuggestions: false,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: 'كلمة المرور',
@@ -157,19 +248,47 @@ class _AuthScreenState extends State<AuthScreen> {
                           return null;
                         },
                       ),
+                      if (_isCreatingAccount) ...[
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: true,
+                          autofillHints: const [AutofillHints.newPassword],
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          textInputAction: TextInputAction.done,
+                          decoration: const InputDecoration(
+                            labelText: 'تأكيد كلمة المرور',
+                            prefixIcon: Icon(Icons.lock_reset_outlined),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value != _passwordController.text) {
+                              return 'كلمتا المرور غير متطابقتين';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
                       const SizedBox(height: 22),
                       SizedBox(
                         height: 52,
                         child: FilledButton(
-                          onPressed: _continueDemo,
+                          onPressed: _isLoading ? null : _continueWithFirebase,
                           style: FilledButton.styleFrom(
                             backgroundColor: _purple,
                             foregroundColor: Colors.white,
                           ),
-                          child: Text(
-                            _isCreatingAccount ? 'إنشاء حساب تجريبي' : 'دخول تجريبي',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(
+                                  _isCreatingAccount ? 'إنشاء حساب' : 'تسجيل الدخول',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -189,7 +308,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       Container(
                         padding: const EdgeInsets.all(13),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF211C31),
+                          color: const Color(0xFF192A3B),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: Colors.white12),
                         ),
@@ -200,7 +319,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             SizedBox(width: 9),
                             Expanded(
                               child: Text(
-                                'تسجيل الدخول وإنشاء الحساب هنا للمعاينة فقط. سيتم تفعيل الحسابات الحقيقية بعد ربط Firebase Authentication.',
+                                'تسجيل الحسابات يتم عبر Firebase Authentication، وتُحفظ بيانات الملف الشخصي في Firestore.',
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,

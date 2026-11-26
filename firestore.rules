@@ -1,0 +1,189 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function areAcceptedFriends(ownerId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/friendships/$(ownerId)/friends/$(request.auth.uid))
+        && get(/databases/$(database)/documents/friendships/$(ownerId)/friends/$(request.auth.uid)).data.status == 'accepted'
+        && exists(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(ownerId))
+        && get(/databases/$(database)/documents/friendships/$(request.auth.uid)/friends/$(ownerId)).data.status == 'accepted';
+    }
+
+    function canReadStatus() {
+      return signedIn()
+        && (
+          resource.data.ownerId == request.auth.uid
+          || resource.data.visibility == 'public'
+          || (resource.data.visibility == 'friends'
+            && areAcceptedFriends(resource.data.ownerId))
+          || (resource.data.visibility == 'selected'
+            && request.auth.uid in resource.data.allowedUserIds)
+        );
+    }
+
+    function isConversationMember(conversationId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/conversations/$(conversationId))
+        && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.memberIds;
+    }
+
+    // Private account data: only the account owner can read it.
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly([
+          'uid', 'displayName', 'photoUrl', 'bio', 'country', 'hideCountry', 'age', 'gender', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid;
+      allow update: if isSelf(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'photoUrl', 'bio', 'country', 'hideCountry', 'age', 'gender', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Public profile contains only safe display fields; counters are server-owned.
+    match /publicProfiles/{uid} {
+      allow read: if signedIn();
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly([
+          'uid', 'displayName', 'photoUrl', 'bio', 'country', 'hideCountry',
+          'giftsCount', 'postsCount', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.giftsCount == 0
+        && request.resource.data.postsCount == 0;
+      allow update: if isSelf(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName', 'photoUrl', 'bio', 'country', 'hideCountry', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    // Friendship records are trusted-server managed. Clients cannot grant
+    // themselves friend status by writing an "accepted" relationship.
+    // Profile visits: each signed-in visitor has one document per profile.
+    // Only the visitor can create/update their own visit timestamp; only the
+    // profile owner can read the visitor list. Clients cannot delete records.
+    match /profileVisits/{ownerUid}/visitors/{visitorUid} {
+      allow read: if isSelf(ownerUid);
+      allow create: if signedIn()
+        && request.auth.uid == visitorUid
+        && ownerUid != visitorUid
+        && request.resource.data.keys().hasOnly(['ownerId', 'visitorId', 'lastVisitedAt'])
+        && request.resource.data.ownerId == ownerUid
+        && request.resource.data.visitorId == request.auth.uid
+        && request.resource.data.lastVisitedAt == request.time;
+      allow update: if signedIn()
+        && request.auth.uid == visitorUid
+        && ownerUid != visitorUid
+        && resource.data.ownerId == ownerUid
+        && resource.data.visitorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastVisitedAt'])
+        && request.resource.data.lastVisitedAt == request.time;
+      allow delete: if false;
+    }
+
+    match /friendships/{uid}/friends/{friendUid} {
+      allow read: if isSelf(uid);
+      allow write: if false;
+    }
+
+    match /conversations/{conversationId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
+      allow create: if signedIn()
+        && request.resource.data.memberIds is list
+        && request.auth.uid in request.resource.data.memberIds
+        && request.resource.data.memberIds.size() >= 2
+        && request.resource.data.memberIds.size() <= 50;
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.memberIds
+        && request.resource.data.memberIds == resource.data.memberIds
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'lastMessage', 'lastMessageAt', 'updatedAt'
+        ]);
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isConversationMember(conversationId);
+        allow create: if isConversationMember(conversationId)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.keys().hasOnly([
+            'senderId', 'text', 'mediaUrl', 'mediaType', 'createdAt'
+          ])
+          && (request.resource.data.text is string
+            || request.resource.data.mediaUrl is string);
+        allow update, delete: if false;
+      }
+    }
+
+    match /statuses/{statusId} {
+      allow read: if canReadStatus();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'ownerId', 'text', 'mediaUrl', 'mediaType',
+          'visibility', 'allowedUserIds', 'expiresAt', 'createdAt'
+        ])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.visibility in ['public', 'friends', 'selected']
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.allowedUserIds is list
+        && request.resource.data.allowedUserIds.size() <= 100
+        && (
+          (request.resource.data.visibility == 'selected'
+            && request.resource.data.allowedUserIds.size() > 0)
+          || (request.resource.data.visibility != 'selected'
+            && request.resource.data.allowedUserIds.size() == 0)
+        )
+        && (
+          !('text' in request.resource.data)
+          || (request.resource.data.text is string
+            && request.resource.data.text.size() <= 180)
+        )
+        && (
+          !('mediaUrl' in request.resource.data)
+          || request.resource.data.mediaUrl is string
+        );
+      // Status content and privacy are immutable after publication.
+      allow update: if false;
+      allow delete: if signedIn()
+        && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.hostId == request.auth.uid;
+      // Clients cannot transfer room ownership or alter live-session state.
+      // Trusted backend functions will manage seats, participants and RTC state.
+      allow update: if signedIn()
+        && resource.data.hostId == request.auth.uid
+        && request.resource.data.hostId == resource.data.hostId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'title', 'description', 'updatedAt'
+        ]);
+      allow delete: if signedIn()
+        && resource.data.hostId == request.auth.uid;
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

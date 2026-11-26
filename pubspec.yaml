@@ -3,17 +3,16 @@ description: Roqksa social voice rooms starter app
 publish_to: 'none'
 version: 1.0.0+1
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.6.0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
-  # Add Firebase and Agora after creating their projects:
-  # firebase_core: ^3.8.1
-  # firebase_auth: ^5.3.4
-  # cloud_firestore: ^5.5.1
-  # agora_rtc_engine: ^6.3.2
+  firebase_core: ^4.15.1
+  firebase_auth: ^6.7.1
+  cloud_firestore: ^6.10.2
+  firebase_storage: ^13.6.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

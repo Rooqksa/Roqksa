@@ -1,14 +1,22 @@
-
 {
-  "name": "Roqksa",
+  "name": "Roqksa - روكسا",
   "short_name": "Roqksa",
-  "start_url": ".",
+  "start_url": "/Roqksa/",
+  "scope": "/Roqksa/",
   "display": "standalone",
-  "background_color": "#100D1B",
-  "theme_color": "#100D1B",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0B1925",
+  "theme_color": "#0B1925",
   "description": "Roqksa - غرف صوتية وتواصل اجتماعي",
   "orientation": "portrait",
   "lang": "ar",
   "dir": "rtl",
-  "icons": []
+  "icons": [
+    {
+      "src": "icons/roqksa.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }

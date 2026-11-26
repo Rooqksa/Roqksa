@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "826610594194",
+    "project_id": "roqksa",
+    "storage_bucket": "roqksa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826610594194:android:984e21a2e1162edce0514b",
+        "android_client_info": {
+          "package_name": "com.roqksa.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0Ty6cOKRSA-dtkfk22pyohVBtzwvRqIs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
