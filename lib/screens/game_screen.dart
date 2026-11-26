@@ -106,16 +106,42 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
-  Widget _candy() => _box(Column(children: [
-    const Text('كاندي: اجمع الحلوى', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-    const SizedBox(height: 12), Text(score.toString(), style: const TextStyle(fontSize: 46, color: aqua, fontWeight: FontWeight.w900)),
-    const Text('نقطة'), const SizedBox(height: 16),
-    Wrap(alignment: WrapAlignment.center, spacing: 12, runSpacing: 12,
-      children: List.generate(9, (i) => InkWell(onTap: () => setState(() { score += random.nextInt(3) + 1; message = 'جميل! واصل جمع الحلوى.'; }),
-        child: Container(width: 68, height: 68, decoration: BoxDecoration(color: Colors.pink.withValues(alpha: .2), borderRadius: BorderRadius.circular(16)),
-          child: Center(child: Text(['🍬','🍭','🍫','🍡','🍩'][i % 5], style: const TextStyle(fontSize: 30)))))),
-    const SizedBox(height: 12), const Text('اضغط على الحلوى لزيادة نقاطك.', style: TextStyle(color: Colors.white54)),
-  ]));
+  Widget _candy() => _box(
+    Column(
+      children: [
+        const Text('كاندي: اجمع الحلوى', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Text(score.toString(), style: const TextStyle(fontSize: 46, color: aqua, fontWeight: FontWeight.w900)),
+        const Text('نقطة'),
+        const SizedBox(height: 16),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 12,
+          children: List.generate(9, (i) {
+            const sweets = ['🍬', '🍭', '🍫', '🍡', '🍩'];
+            return InkWell(
+              onTap: () => setState(() {
+                score += random.nextInt(3) + 1;
+                message = 'جميل! واصل جمع الحلوى.';
+              }),
+              child: Container(
+                width: 68,
+                height: 68,
+                decoration: BoxDecoration(
+                  color: Colors.pink.withValues(alpha: .2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(child: Text(sweets[i % sweets.length], style: const TextStyle(fontSize: 30))),
+              ),
+            );
+          }),
+        ),
+        const SizedBox(height: 12),
+        const Text('اضغط على الحلوى لزيادة نقاطك.', style: TextStyle(color: Colors.white54)),
+      ],
+    ),
+  );
 
   Widget _million() {
     final q = quiz[question % quiz.length];
