@@ -119,6 +119,8 @@ void main() {
 
     await tester.tap(find.text('حسابي'));
     await tester.pumpAndSettle();
+    expect(find.text('الرتبة والألقاب'), findsOneWidget);
+    expect(find.text('VIP 1'), findsOneWidget);
     await tester.tap(find.text('تعديل الملف الشخصي'));
     await tester.pumpAndSettle();
 
