@@ -40,13 +40,13 @@ service cloud.firestore {
       allow read: if isSelf(uid);
       allow create: if isSelf(uid)
         && request.resource.data.keys().hasOnly([
-          'uid', 'displayName', 'photoUrl', 'bio', 'createdAt', 'updatedAt'
+          'uid', 'displayName', 'photoUrl', 'bio', 'country', 'hideCountry', 'age', 'gender', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == uid;
       allow update: if isSelf(uid)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName', 'photoUrl', 'bio', 'updatedAt'
+          'displayName', 'photoUrl', 'bio', 'country', 'hideCountry', 'updatedAt'
         ]);
       allow delete: if false;
     }
@@ -56,7 +56,7 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if isSelf(uid)
         && request.resource.data.keys().hasOnly([
-          'uid', 'displayName', 'photoUrl', 'bio',
+          'uid', 'displayName', 'photoUrl', 'bio', 'country', 'hideCountry',
           'giftsCount', 'postsCount', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.uid == uid
