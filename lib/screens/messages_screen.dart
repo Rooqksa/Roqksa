@@ -10,10 +10,10 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
-  static const Color _background = Color(0xFF15111F);
-  static const Color _surface = Color(0xFF211C31);
-  static const Color _purple = Color(0xFF493568);
-  static const Color _gold = Color(0xFFE9BD68);
+  static const Color _background = Color(0xFF101C2B);
+  static const Color _surface = Color(0xFF192A3B);
+  static const Color _purple = Color(0xFF245D6A);
+  static const Color _gold = Color(0xFFFFC86B);
 
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
@@ -310,7 +310,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       child: Text(
                         unread.toString(),
                         style: const TextStyle(
-                          color: Color(0xFF211C31),
+                          color: Color(0xFF192A3B),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -380,10 +380,10 @@ class _LocalChatScreen extends StatefulWidget {
 }
 
 class _LocalChatScreenState extends State<_LocalChatScreen> {
-  static const Color _background = Color(0xFF15111F);
-  static const Color _surface = Color(0xFF211C31);
-  static const Color _purple = Color(0xFF493568);
-  static const Color _gold = Color(0xFFE9BD68);
+  static const Color _background = Color(0xFF101C2B);
+  static const Color _surface = Color(0xFF192A3B);
+  static const Color _purple = Color(0xFF245D6A);
+  static const Color _gold = Color(0xFFFFC86B);
 
   final TextEditingController controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
