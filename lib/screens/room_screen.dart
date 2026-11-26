@@ -14,6 +14,7 @@ class _RoomScreenState extends State<RoomScreen> {
   int likes = 128;
   int selectedSeat = -1;
   int requestedSeat = -1;
+  int seatLayout = 0; // 0: اثنان بالأعلى، 1: المضيف بالمنتصف، 2: صف أفقي
   final TextEditingController _roomMessageController = TextEditingController();
 
   @override
@@ -162,7 +163,7 @@ class _RoomScreenState extends State<RoomScreen> {
         SafeArea(child: Column(children: [
           _buildHeader(),
           _buildRoomBanner(),
-          const SizedBox(height: 3),
+          _buildSeatLayoutButton(),
           Expanded(child: _buildSeats()),
           _buildChatPreview(),
           _buildControls(),
@@ -243,45 +244,187 @@ class _RoomScreenState extends State<RoomScreen> {
     ]),
   );
 
-  Widget _buildSeats() => GridView.builder(
-    padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-    itemCount: seats.length,
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 9, crossAxisSpacing: 7, childAspectRatio: .72),
-    itemBuilder: (context, index) {
-      final seat = seats[index];
-      final isHost = seat['host'] as bool;
-      final isEmpty = seat['name'] == 'مقعد فارغ';
-      final isSelected = selectedSeat == index;
-      return InkWell(
-        borderRadius: BorderRadius.circular(17),
-        onTap: () {
-          if (isEmpty) {
-            setState(() { selectedSeat = index; requestedSeat = index; });
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تم إرسال طلب الصعود إلى المقعد رقم ${index + 1}')));
-          } else {
-            setState(() => selectedSeat = index);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('هذا ${seat['name']}'), duration: const Duration(seconds: 1)));
-          }
-        },
+  Widget _buildSeatLayoutButton() => Padding(
+    padding: const EdgeInsets.fromLTRB(14, 0, 14, 5),
+    child: Align(
+      alignment: Alignment.centerRight,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: _showSeatLayoutPicker,
         child: Container(
-          decoration: BoxDecoration(color: Colors.white.withValues(alpha: isSelected ? .13 : .055), borderRadius: BorderRadius.circular(17), border: Border.all(color: isHost || isSelected ? aqua.withValues(alpha: .8) : Colors.white.withValues(alpha: .08), width: isHost || isSelected ? 1.5 : 1)),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Stack(alignment: Alignment.bottomRight, children: [
-              Container(
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: (isHost ? const Color(0xFFB45CFF) : const Color(0xFF5B8DFF)).withValues(alpha: .5), blurRadius: 13)], gradient: LinearGradient(colors: isHost ? [const Color(0xFFFFD76D), const Color(0xFFB45CFF)] : [const Color(0xFFFF72C6), const Color(0xFF5B8DFF)])),
-                child: CircleAvatar(radius: 30, backgroundColor: isEmpty ? const Color(0xFF1A1234) : const Color(0xFF30204E), child: isEmpty ? const Icon(Icons.add_rounded, color: Colors.white, size: 28) : Text(seat['emoji'] as String, style: const TextStyle(fontSize: 27))),
-              ),
-              if (!isEmpty) Container(width: 10, height: 10, decoration: BoxDecoration(color: const Color(0xFF36D6A2), shape: BoxShape.circle, border: Border.all(color: background, width: 1.5))),
-            ]),
-            const SizedBox(height: 7),
-            Text(isHost ? '👑 المضيف' : requestedSeat == index ? 'بانتظار الموافقة' : seat['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isHost ? const Color(0xFFFFD36E) : requestedSeat == index ? aqua : Colors.white70, fontSize: 10, fontWeight: isHost || requestedSeat == index ? FontWeight.bold : FontWeight.normal)),
-            if (isHost) const Text('مالك الغرفة', style: TextStyle(color: Colors.white38, fontSize: 8)),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: const Color(0xFF32145B),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: violet.withValues(alpha: .65)),
+          ),
+          child: const Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.dashboard_customize_rounded, color: Color(0xFFD5B5FF), size: 16),
+            SizedBox(width: 6),
+            Text('تغيير شكل المقاعد', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+            SizedBox(width: 4),
+            Icon(Icons.expand_more_rounded, color: Colors.white70, size: 16),
           ]),
         ),
-      );
-    },
+      ),
+    ),
   );
+
+  void _showSeatLayoutPicker() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF170D2D),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 26),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('تغيير شكل المقاعد', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 5),
+            const Text('اختر طريقة عرض أعضاء الغرفة', style: TextStyle(color: Colors.white60, fontSize: 11)),
+            const SizedBox(height: 18),
+            Row(children: [
+              _SeatLayoutOption(
+                title: 'اثنان فوق والباقي تحت',
+                icon: Icons.grid_view_rounded,
+                selected: seatLayout == 0,
+                onTap: () => setSheetState(() => setState(() => seatLayout = 0)),
+              ),
+              const SizedBox(width: 8),
+              _SeatLayoutOption(
+                title: 'المضيف في المنتصف',
+                icon: Icons.radio_button_checked_rounded,
+                selected: seatLayout == 1,
+                onTap: () => setSheetState(() => setState(() => seatLayout = 1)),
+              ),
+              const SizedBox(width: 8),
+              _SeatLayoutOption(
+                title: 'صف أفقي واحد',
+                icon: Icons.view_week_rounded,
+                selected: seatLayout == 2,
+                onTap: () => setSheetState(() => setState(() => seatLayout = 2)),
+              ),
+            ]),
+            const SizedBox(height: 18),
+            SizedBox(width: double.infinity, child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: violet,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+              onPressed: () => Navigator.pop(sheetContext),
+              icon: const Icon(Icons.check_rounded),
+              label: const Text('تطبيق الشكل'),
+            )),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeats() {
+    if (seatLayout == 2) {
+      return SizedBox(
+        height: 150,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          itemCount: seats.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 9),
+          itemBuilder: (_, index) => SizedBox(width: 105, child: _buildSeatCard(index)),
+        ),
+      );
+    }
+
+    if (seatLayout == 1) {
+      return Column(children: [
+        const SizedBox(height: 8),
+        SizedBox(height: 126, child: Center(child: SizedBox(width: 124, child: _buildSeatCard(0)))),
+        const SizedBox(height: 4),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 8),
+            itemCount: seats.length - 1,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, mainAxisSpacing: 8, crossAxisSpacing: 9, childAspectRatio: .88,
+            ),
+            itemBuilder: (_, index) => _buildSeatCard(index + 1),
+          ),
+        ),
+      ]);
+    }
+
+    return Column(children: [
+      const SizedBox(height: 8),
+      SizedBox(
+        height: 126,
+        child: Row(children: [
+          const Spacer(),
+          SizedBox(width: 112, child: _buildSeatCard(0)),
+          const SizedBox(width: 12),
+          SizedBox(width: 112, child: _buildSeatCard(1)),
+          const Spacer(),
+        ]),
+      ),
+      Expanded(
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 8),
+          itemCount: seats.length - 2,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, mainAxisSpacing: 8, crossAxisSpacing: 9, childAspectRatio: .88,
+          ),
+          itemBuilder: (_, index) => _buildSeatCard(index + 2),
+        ),
+      ),
+    ]);
+  }
+
+  Widget _buildSeatCard(int index) {
+    final seat = seats[index];
+    final isHost = seat['host'] as bool;
+    final isEmpty = seat['name'] == 'مقعد فارغ';
+    final isSelected = selectedSeat == index;
+    return InkWell(
+      borderRadius: BorderRadius.circular(17),
+      onTap: () {
+        if (isEmpty) {
+          setState(() { selectedSeat = index; requestedSeat = index; });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تم إرسال طلب الصعود إلى المقعد رقم ${index + 1}')));
+        } else {
+          setState(() => selectedSeat = index);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('هذا ${seat['name']}'), duration: const Duration(seconds: 1)));
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: isSelected ? .13 : .055),
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: isHost || isSelected ? aqua.withValues(alpha: .8) : Colors.white.withValues(alpha: .08), width: isHost || isSelected ? 1.5 : 1),
+        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Stack(alignment: Alignment.bottomRight, children: [
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: (isHost ? const Color(0xFFB45CFF) : const Color(0xFF5B8DFF)).withValues(alpha: .5), blurRadius: 13)],
+                gradient: LinearGradient(colors: isHost ? [const Color(0xFFFFD76D), const Color(0xFFB45CFF)] : [const Color(0xFFFF72C6), const Color(0xFF5B8DFF)]),
+              ),
+              child: CircleAvatar(radius: seatLayout == 1 && isHost ? 34 : 27, backgroundColor: isEmpty ? const Color(0xFF1A1234) : const Color(0xFF30204E), child: isEmpty ? const Icon(Icons.add_rounded, color: Colors.white, size: 28) : Text(seat['emoji'] as String, style: const TextStyle(fontSize: 25))),
+            ),
+            if (!isEmpty) Container(width: 10, height: 10, decoration: BoxDecoration(color: const Color(0xFF36D6A2), shape: BoxShape.circle, border: Border.all(color: background, width: 1.5))),
+          ]),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Text(isHost ? '👑 المضيف' : requestedSeat == index ? 'بانتظار الموافقة' : seat['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isHost ? const Color(0xFFFFD36E) : requestedSeat == index ? aqua : Colors.white70, fontSize: 9, fontWeight: isHost || requestedSeat == index ? FontWeight.bold : FontWeight.normal)),
+          ),
+          if (isHost) const Text('مالك الغرفة', style: TextStyle(color: Colors.white38, fontSize: 8)),
+        ]),
+      ),
+    );
+  }
 
   Widget _buildChatPreview() => Container(
     margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -362,6 +505,38 @@ class _RoomDetailRow extends StatelessWidget {
       Expanded(child: Text(label, style: const TextStyle(color: Colors.white70))),
       Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
     ]),
+  );
+}
+
+class _SeatLayoutOption extends StatelessWidget {
+  const _SeatLayoutOption({required this.title, required this.icon, required this.selected, required this.onTap});
+  final String title;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        height: 112,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFF3A1767) : const Color(0xFF24163D),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: selected ? const Color(0xFFB66CFF) : Colors.white24, width: selected ? 1.6 : 1),
+        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon, color: selected ? const Color(0xFFD9B5FF) : Colors.white70, size: 30),
+          const SizedBox(height: 9),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 10)),
+          const SizedBox(height: 5),
+          Icon(selected ? Icons.check_circle_rounded : Icons.circle_outlined, color: selected ? const Color(0xFFCE8AFF) : Colors.white38, size: 17),
+        ]),
+      ),
+    ),
   );
 }
 
