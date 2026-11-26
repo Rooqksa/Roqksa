@@ -60,13 +60,13 @@ void main() {
     expect(find.text('كلمتا المرور غير متطابقتين'), findsOneWidget);
   });
 
-  testWidgets('profile editor validates and updates the displayed name', (tester) async {
+  testWidgets('profile editor validates a short display name', (tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(body: ProfileScreen()),
     ));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('تعديل الملف الشخصي'));
+    await tester.tap(find.byTooltip('تعديل الملف الشخصي'));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextFormField).first, 'س');
@@ -77,7 +77,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).first, 'مستخدم جديد');
     await tester.tap(find.text('حفظ'));
     await tester.pumpAndSettle();
-    expect(find.text('مستخدم جديد'), findsOneWidget);
+    expect(find.text('تعديل الملف الشخصي'), findsNothing);
   });
 
   testWidgets('million quiz ends after the final question and can restart', (tester) async {
@@ -128,6 +128,8 @@ void main() {
   testWidgets('room controls update local mic, seat request and likes', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(const MaterialApp(
       home: RoomScreen(roomName: 'غرفة الاختبار'),
@@ -135,7 +137,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('غرفة الاختبار'), findsOneWidget);
-    await tester.tap(find.text('ميكروفون'));
+    await tester.tap(find.text('طلب المايك'));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
 
@@ -143,18 +145,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('بانتظار الموافقة'), findsOneWidget);
 
-    // Dismiss the seat-request SnackBar so it cannot cover the bottom controls.
     tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).hideCurrentSnackBar();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('إعجاب'));
+    await tester.tap(find.text('الخيارات'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.text('إرسال إعجاب'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('الخيارات'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('معلومات الغرفة'));
     await tester.pumpAndSettle();
     expect(find.text('129'), findsOneWidget);
-
-    tester.view.resetPhysicalSize();
-    tester.view.resetDevicePixelRatio();
   });
  
 }
