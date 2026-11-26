@@ -34,6 +34,21 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
     {'name': 'سيارة فاخرة', 'price': 500, 'icon': Icons.directions_car_rounded, 'color': Color(0xFF59B7C7)},
   ];
 
+  final featureGroups = const [
+    ('الحساب والملف الشخصي', 'التسجيل، الملف الشخصي، الصور، الغلاف، الأصدقاء والمتابعون', Icons.account_circle_rounded),
+    ('الحالات والمنشورات', 'حالات شبيهة بواتساب، صور، منشورات، تعليقات وإعجابات', Icons.dynamic_feed_rounded),
+    ('الرسائل الخاصة', 'محادثات، صور، فيديوهات قصيرة وإشعارات لقطات الشاشة حسب دعم الجهاز', Icons.chat_rounded),
+    ('الغرف الصوتية', 'مقاعد، متحدثون، مستمعون، دردشة، خلفيات ومستويات الغرف', Icons.mic_rounded),
+    ('القبائل والمنافسات', 'قادة ونواب وأعضاء ودعوات ومستويات وترتيب وتحديات', Icons.groups_rounded),
+    ('المتجر والمحفظة', 'عملات وهدايا واشتراكات وسجل عمليات ومعاملات آمنة', Icons.wallet_rounded),
+    ('مركز العروض والمنجم', 'عروض ومكافآت ونظام استثمار المنجم وفق قواعد واضحة', Icons.diamond_rounded),
+    ('استوديو الصوت والفنون', 'تسجيل ونشر القصائد والغناء والعزف والكوميديا وتحسين الصوت', Icons.graphic_eq_rounded),
+    ('المشاهدة والمحتوى', 'فتح YouTube والخدمات الرسمية للمشاهدة الجماعية', Icons.ondemand_video_rounded),
+    ('الألقاب والشارات', 'فنان، مصمم، كوميدي، شاعر، مبدع، أسطورة وألقاب مخصصة', Icons.workspace_premium_rounded),
+    ('لوحة المالك والإدارة', 'إدارة الأعضاء والرتب والإعلانات والغرف والمحفظة وسجل التدقيق', Icons.admin_panel_settings_rounded),
+    ('الأمان والخصوصية', 'مصادقة وصلاحيات وبلاغات وحظر وحماية الحساب والمعاملات', Icons.shield_rounded),
+  ];
+
   final games = const [
     _GameInfo(name: 'كيرم', subtitle: 'تحدَّ أصدقاءك في لعبة الكيرم', icon: Icons.sports_esports_rounded, color: Color(0xFFE8A45B)),
     _GameInfo(name: 'لودو', subtitle: 'سباق الحظ والذكاء بين الأصدقاء', icon: Icons.casino_rounded, color: Color(0xFF67C6A3)),
@@ -100,6 +115,12 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
                 ),
                 const SizedBox(height: 12),
                 _buildGamesGrid(),
+                const SizedBox(height: 22),
+                heading('جميع خدمات Roqksa', Icons.apps_rounded),
+                const SizedBox(height: 6),
+                const Text('هذه خارطة الوظائف المعتمدة؛ تظهر هنا للتوضيح، وتُفعّل الخدمات تدريجياً بعد ربط الخوادم وقواعد البيانات.', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                const SizedBox(height: 10),
+                _buildFeatureGroups(),
                 const SizedBox(height: 22),
                 heading('من زارني', Icons.visibility),
                 const SizedBox(height: 10),
@@ -185,6 +206,35 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
             ),
           ),
         ),
+      );
+
+  Widget _buildFeatureGroups() => Column(
+        children: featureGroups.map((item) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: .06)),
+          ),
+          child: ListTile(
+            leading: Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: turquoise.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(item.$3, color: turquoise),
+            ),
+            title: Text(item.$1, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(item.$2, style: const TextStyle(color: Colors.white60, fontSize: 11)),
+            ),
+            trailing: const Text('ضمن الخطة', style: TextStyle(color: gold, fontSize: 10, fontWeight: FontWeight.bold)),
+            isThreeLine: true,
+          ),
+        )).toList(),
       );
 
   Widget _buildGamesGrid() => GridView.builder(
