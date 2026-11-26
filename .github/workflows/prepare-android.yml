@@ -39,15 +39,11 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import shutil
-          candidates = [
-              Path("android/app/build.gradle"),
-              Path("android/app/build.gradle.kts"),
-          ]
+          candidates = [Path("android/app/build.gradle"), Path("android/app/build.gradle.kts")]
           found = False
           for path in candidates:
               if path.exists():
-                  text = path.read_text().replace('com.roqksa.roqksa', 'com.roqksa.app')
-                  path.write_text(text)
+                  path.write_text(path.read_text().replace('com.roqksa.roqksa', 'com.roqksa.app'))
                   found = True
           if not found:
               raise SystemExit("Android app Gradle file was not generated")
@@ -64,6 +60,22 @@ jobs:
               manifest.write_text(manifest.read_text().replace('android:label="roqksa"', 'android:label="Roqksa"'))
           PY
 
+      - name: Generate Android launcher icons from Roqksa star-eye artwork
+        run: |
+          python3 -m pip install --quiet cairosvg
+          python3 - <<'PY'
+          from pathlib import Path
+          import cairosvg
+          source = Path("web/icons/roqksa.svg").read_bytes()
+          sizes = {"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
+          base = Path("android/app/src/main/res")
+          for folder, size in sizes.items():
+              target_dir = base / folder
+              target_dir.mkdir(parents=True, exist_ok=True)
+              cairosvg.svg2png(bytestring=source, write_to=str(target_dir / "ic_launcher.png"), output_width=size, output_height=size)
+          print("Generated Android launcher icons from web/icons/roqksa.svg")
+          PY
+
       - name: Verify Android package configuration
         run: |
           grep -R -n 'com.roqksa.app' android/app
@@ -78,7 +90,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Android platform files are already up to date."
           else
-            git commit -m "Add generated Android platform scaffold"
+            git commit -m "Add Android launcher icon and platform scaffold"
             git push origin HEAD:feature/production-foundation
           fi
 
