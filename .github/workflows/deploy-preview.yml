@@ -50,3 +50,33 @@ jobs:
       - name: Deploy preview
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before retrying Pages deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 5
+
+      - name: Deploy preview (retry 1)
+        id: deployment_retry_1
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before second retry
+        if: steps.deployment_retry_1.outcome == 'failure'
+        run: sleep 20
+
+      - name: Deploy preview (retry 2)
+        id: deployment_retry_2
+        if: steps.deployment_retry_1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Wait before final retry
+        if: steps.deployment_retry_2.outcome == 'failure'
+        run: sleep 60
+
+      - name: Deploy preview (retry 3)
+        id: deployment_retry_3
+        if: steps.deployment_retry_2.outcome == 'failure'
+        uses: actions/deploy-pages@v4
