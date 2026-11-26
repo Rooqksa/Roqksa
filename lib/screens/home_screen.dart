@@ -221,53 +221,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildWelcomeBanner() {
     return Container(
-      padding: const EdgeInsets.all(19),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [Color(0xFF168F9B), Color(0xFF176C7C), Color(0xFF21465A)],
+          colors: [Color(0xFF12AFAE), Color(0xFF087B91), Color(0xFF173C58)],
         ),
-        borderRadius: BorderRadius.circular(23),
-        border: Border.all(color: Colors.white.withValues(alpha: .10)),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: const Color(0xFF7AF4E9).withValues(alpha: .30)),
         boxShadow: [
           BoxShadow(
-            color: purple.withValues(alpha: .18),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF16CFC4).withValues(alpha: .20),
+            blurRadius: 28,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          const Text(
-            'صوتك يجمعنا',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 7),
-          const Text(
-            'ادخل غرفتك المفضلة وتعرّف على أصدقاء جدد',
-            style: TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(height: 17),
-          Row(
-            children: [
-              const Icon(Icons.graphic_eq_rounded, size: 29, color: gold),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'غرف صوتية ومساحات تجمعنا',
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
+          Positioned(
+            left: -24,
+            top: -34,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: .07),
               ),
-              FilledButton.tonal(
-                onPressed: () => setState(() => selectedTab = 1),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: .16),
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('اكتشف'),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: .16),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, color: Color(0xFF8BFFC4), size: 8),
+                        SizedBox(width: 6),
+                        Text('مجتمعك الآن', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(Icons.graphic_eq_rounded, color: Color(0xFFFFD27A), size: 32),
+                ],
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'هنا تبدأ\nأجمل السوالف',
+                style: TextStyle(fontSize: 29, height: 1.12, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 9),
+              const Text(
+                'ادخل غرفة صوتية، شارك لحظتك، وتعرّف على أصدقاء جدد',
+                style: TextStyle(color: Colors.white.withValues(alpha: .82), height: 1.45, fontSize: 13),
+              ),
+              const SizedBox(height: 19),
+              Row(
+                children: [
+                  FilledButton(
+                    onPressed: () => setState(() => selectedTab = 1),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFD27A),
+                      foregroundColor: const Color(0xFF173C58),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    ),
+                    child: const Text('اكتشف الغرف', style: TextStyle(fontWeight: FontWeight.w900)),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text('🎙️  صوت • أصدقاء • متعة', style: TextStyle(fontSize: 11, color: Colors.white70)),
+                ],
               ),
             ],
           ),
