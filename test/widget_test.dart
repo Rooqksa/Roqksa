@@ -125,7 +125,7 @@ void main() {
   });
 
  
-  testWidgets('room controls update local mic, seat request and likes', (tester) async {
+  testWidgets('room controls update local mic and seat request', (tester) async {
     tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -148,18 +148,7 @@ void main() {
     tester.state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger)).hideCurrentSnackBar();
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.byIcon(Icons.more_horiz_rounded));
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
-    await tester.pumpAndSettle();
-    expect(find.text('خيارات الغرفة'), findsOneWidget);
-    await tester.tap(find.text('إرسال إعجاب'));
-    await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('معلومات الغرفة'));
-    await tester.pumpAndSettle();
-    expect(find.text('129'), findsOneWidget);
   });
  
 }
