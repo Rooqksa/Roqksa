@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   spacing: 7,
                   runSpacing: 7,
                   children: [
-                    _IdentityBadge(label: 'عضو Roqksa', icon: Icons.person_rounded, color: const Color(0xFF5DE0D7)),
+                    _IdentityBadge(label: 'عضو المجتمع', icon: Icons.person_rounded, color: const Color(0xFF5DE0D7)),
                     _IdentityBadge(label: 'محب الألعاب', icon: Icons.sports_esports_rounded, color: const Color(0xFF69B7E8)),
                     _IdentityBadge(label: 'صديق المجتمع', icon: Icons.diversity_3_rounded, color: const Color(0xFFB49BFF)),
                   ],
