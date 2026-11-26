@@ -222,28 +222,6 @@ class _RoomScreenState extends State<RoomScreen> {
     ]),
   );
 
-  Widget _buildAnnouncement() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 15),
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-    decoration: BoxDecoration(color: const Color(0xFF352A55).withValues(alpha: .85), borderRadius: BorderRadius.circular(13)),
-    child: const Row(children: [
-      Icon(Icons.campaign_rounded, color: Color(0xFFFFD36E), size: 18),
-      SizedBox(width: 8),
-      Expanded(child: Text('مرحباً بكم! احترموا الجميع واستمتعوا بوقتكم 💜', style: TextStyle(fontSize: 10, color: Colors.white))),
-    ]),
-  );
-
-  Widget _buildSeatHeading() => Padding(
-    padding: const EdgeInsets.fromLTRB(18, 5, 18, 0),
-    child: Row(children: [
-      const Icon(Icons.mic_rounded, color: aqua, size: 17),
-      const SizedBox(width: 7),
-      const Text('مقاعد المتحدثين', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-      const Spacer(),
-      Text('اضغط على مقعد فارغ للانضمام', style: TextStyle(color: Colors.white.withValues(alpha: .52), fontSize: 9)),
-    ]),
-  );
-
   Widget _buildSeatLayoutButton() => Padding(
     padding: const EdgeInsets.fromLTRB(14, 0, 14, 5),
     child: Align(
