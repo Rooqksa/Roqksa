@@ -10,7 +10,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   static const gold = Color(0xFFFFC86B);
-  static const purple = Color(0xFF27D7D0);
 
   String displayName = 'عضو Roqksa';
   String bio = 'أهلاً بكم في عالمي الصوتي ❤️';
