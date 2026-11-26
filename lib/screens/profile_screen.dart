@@ -20,6 +20,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? gender;
   bool hideCountry = false;
 
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } on FirebaseException {
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     if (user == null) return;
     try {
       final privateDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
@@ -60,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (result == null || !mounted) return;
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _currentUser;
     if (user == null) return;
     try {
       final batch = FirebaseFirestore.instance.batch();
@@ -169,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               const Icon(Icons.male_rounded, color: Color(0xFF55AFFF), size: 22),
                             ]),
                             const SizedBox(height: 5),
-                            Text('ID: ${FirebaseAuth.instance.currentUser?.uid.substring(0, 7) ?? '—'}',
+                            Text('ID: ${_currentUser?.uid.substring(0, 7) ?? '—'}',
                               style: const TextStyle(color: muted, fontSize: 14)),
                             const SizedBox(height: 9),
                             Wrap(spacing: 6, runSpacing: 5, children: const [
