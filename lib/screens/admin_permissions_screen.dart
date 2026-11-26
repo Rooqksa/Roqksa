@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// واجهة معاينة لإدارة تفويض الإداريين.
 /// لا تحفظ تغييرات فعلية حتى تُربط بوظائف خادم موثوقة وهوية المالك.
@@ -47,50 +47,83 @@ class _AdminPermissionsScreenState extends State<AdminPermissionsScreen> {
                   children: [
                     Icon(Icons.shield_rounded, color: _gold),
                     SizedBox(width: 10),
-                    Expanded(child: Text(
-                      'معاينة تصميم فقط: الحسابات المعروضة تجريبية، والتغييرات لا تُحفظ ولا تمنح صلاحيات حقيقية. سيُفعّل الحفظ بعد ربط تحقق المالك بالخادم.',
-                      style: TextStyle(height: 1.5, fontSize: 12),
-                    )),
+                    Expanded(
+                      child: Text(
+                        'معاينة تصميم فقط: الحسابات المعروضة تجريبية، والتغييرات لا تُحفظ ولا تمنح صلاحيات حقيقية. سيُفعّل الحفظ بعد ربط تحقق المالك بالخادم.',
+                        style: TextStyle(height: 1.5, fontSize: 12),
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 18),
-              const Text('اختر الإداري', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
+              const Text(
+                'اختر الإداري',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17),
+              ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _selectedAdmin,
-                decoration: const InputDecoration(prefixIcon: Icon(Icons.admin_panel_settings_outlined)),
-                items: _admins.map((name) => DropdownMenuItem(value: name, child: Text(name))).toList(),
+                key: ValueKey(_selectedAdmin),
+                initialValue: _selectedAdmin,
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.admin_panel_settings_outlined),
+                ),
+                items: _admins
+                    .map((name) => DropdownMenuItem(value: name, child: Text(name)))
+                    .toList(),
                 onChanged: (value) {
-                  if (value != null) setState(() {
-                    _selectedAdmin = value;
-                    _selectedPermissions
-                      ..clear()
-                      ..addAll(value == _admins.first
-                          ? ['عرض ملفات الأعضاء', 'مراجعة البلاغات']
-                          : ['عرض سجل الإجراءات الإدارية']);
-                  });
+                  if (value != null) {
+                    setState(() {
+                      _selectedAdmin = value;
+                      _selectedPermissions
+                        ..clear()
+                        ..addAll(
+                          value == _admins.first
+                              ? ['عرض ملفات الأعضاء', 'مراجعة البلاغات']
+                              : ['عرض سجل الإجراءات الإدارية'],
+                        );
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 18),
-              Row(children: [
-                const Expanded(child: Text('الصلاحيات المتاحة', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17))),
-                Text('${_selectedPermissions.length} محددة', style: const TextStyle(color: _gold, fontSize: 12)),
-              ]),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'الصلاحيات المتاحة',
+                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17),
+                    ),
+                  ),
+                  Text(
+                    '${_selectedPermissions.length} محددة',
+                    style: const TextStyle(color: _gold, fontSize: 12),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
-              ..._permissionGroups.entries.map((group) => Card(
-                    color: _surface,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: ExpansionTile(
-                      initiallyExpanded: true,
-                      title: Text(group.key, style: const TextStyle(fontWeight: FontWeight.w800)),
-                      children: group.value.map((permission) => CheckboxListTile(
+              ..._permissionGroups.entries.map(
+                (group) => Card(
+                  color: _surface,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    title: Text(
+                      group.key,
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    children: group.value
+                        .map(
+                          (permission) => CheckboxListTile(
                             value: _selectedPermissions.contains(permission),
                             activeColor: _gold,
                             checkColor: const Color(0xFF172331),
                             dense: true,
                             controlAffinity: ListTileControlAffinity.leading,
-                            title: Text(permission, style: const TextStyle(fontSize: 13)),
+                            title: Text(
+                              permission,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                             onChanged: (checked) => setState(() {
                               if (checked == true) {
                                 _selectedPermissions.add(permission);
@@ -98,9 +131,12 @@ class _AdminPermissionsScreenState extends State<AdminPermissionsScreen> {
                                 _selectedPermissions.remove(permission);
                               }
                             }),
-                          )).toList(),
-                    ),
-                  )),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: null,
