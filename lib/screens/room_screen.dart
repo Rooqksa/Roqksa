@@ -120,7 +120,7 @@ class _RoomScreenState extends State<RoomScreen> {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('عضو الغرفة: $name')));
         }
       }, child: LayoutBuilder(builder: (context, box) {
-        final d = math.min(box.maxWidth * .76, box.maxHeight * .72).clamp(38.0, 82.0);
+        final d = math.min(box.maxWidth * .76, box.maxHeight * .72).clamp(38.0, 82.0).toDouble();
         return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Container(width: d, height: d, decoration: BoxDecoration(
             shape: BoxShape.circle, color: Colors.white.withOpacity(.17),
