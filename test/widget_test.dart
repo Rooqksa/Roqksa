@@ -141,7 +141,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
 
-    await tester.tap(find.text('مقعد فارغ').first);
+    await tester.tap(find.byIcon(Icons.add).first);
     await tester.pumpAndSettle();
     expect(find.text('بانتظار الموافقة'), findsOneWidget);
 
