@@ -104,7 +104,11 @@ class _GameScreenState extends State<GameScreen> {
         b = min(30, b + value);
         message = b >= 30 ? 'فاز الصديق في هذه الجولة.' : 'تقدم الصديق ' + value.toString() + ' خطوات. دورك.';
       }
-      turn = 1 - turn;
+      // In the crazy Jackaroo demo, rolling a six grants the same
+      // player another turn instead of only displaying a message.
+      turn = widget.gameIndex == 2 && value == 6 && a < 30 && b < 30
+          ? 0
+          : 1 - turn;
     });
   }
 
@@ -146,16 +150,38 @@ class _GameScreenState extends State<GameScreen> {
   );
 
   Widget _million() {
-    final q = quiz[question % quiz.length];
+    if (question >= quiz.length) {
+      return _box(Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(Icons.emoji_events_rounded, color: aqua, size: 56),
+          const SizedBox(height: 12),
+          const Text('انتهت المسابقة!', textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text('نتيجتك: $score نقطة تجريبية',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: aqua, fontSize: 18)),
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: _reset,
+            child: const Text('العب من جديد'),
+          ),
+        ],
+      ));
+    }
+    final q = quiz[question];
     return _box(Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Text('السؤال ' + (question + 1).toString(), style: const TextStyle(color: aqua, fontWeight: FontWeight.bold)),
+      Text('السؤال ' + (question + 1).toString() + ' من ' + quiz.length.toString(),
+          style: const TextStyle(color: aqua, fontWeight: FontWeight.bold)),
       const SizedBox(height: 12), Text(q.$1, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
       const SizedBox(height: 16),
       ...List.generate(4, (i) => Padding(padding: const EdgeInsets.only(bottom: 8),
         child: OutlinedButton(onPressed: () => setState(() {
           if (i == q.$3) { score += 100; message = 'إجابة صحيحة! ربحت 100 نقطة تجريبية.'; }
-          else { message = 'إجابة غير صحيحة. جرّب السؤال التالي.'; }
+          else { message = 'إجابة غير صحيحة. انتقل إلى السؤال التالي.'; }
           question++;
+          if (question == quiz.length) message = 'اكتملت الأسئلة. شاهد نتيجتك!';
         }), child: Text(String.fromCharCode(65 + i) + '. ' + q.$2[i])))),
     ]));
   }
