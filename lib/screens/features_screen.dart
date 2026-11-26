@@ -9,9 +9,9 @@ class FeaturesScreen extends StatefulWidget {
 }
 
 class _FeaturesScreenState extends State<FeaturesScreen> {
-  static const bg = Color(0xFF15111F);
-  static const surface = Color(0xFF211C31);
-  static const gold = Color(0xFFE9BD68);
+  static const bg = Color(0xFF101C2B);
+  static const surface = Color(0xFF192A3B);
+  static const gold = Color(0xFFFFC86B);
   final posts = <Map<String, dynamic>>[
     {'name':'صديق Roqksa','vip':8,'text':'مساء الخير يا أجمل مجتمع ❤️','likes':12},
     {'name':'عضو مميز','vip':4,'text':'نلتقي الليلة في الغرف الصوتية 🌙','likes':7},
@@ -25,11 +25,11 @@ class _FeaturesScreenState extends State<FeaturesScreen> {
   final products = [
     {'name':'وردة','price':10,'icon':Icons.local_florist_rounded,'color':Color(0xFFE879A5)},
     {'name':'قلب ذهبي','price':50,'icon':Icons.favorite_rounded,'color':gold},
-    {'name':'تاج ملكي','price':150,'icon':Icons.workspace_premium_rounded,'color':Color(0xFF9B72FF)},
+    {'name':'تاج ملكي','price':150,'icon':Icons.workspace_premium_rounded,'color':Color(0xFF27D7D0)},
     {'name':'سيارة فاخرة','price':500,'icon':Icons.directions_car_rounded,'color':Color(0xFF59B7C7)},
   ];
   Color vipColor(int n) {
-    const colors = [Color(0xFF9E9E9E),Color(0xFF8D9AA6),Color(0xFF69A7C8),Color(0xFF4E91D8),Color(0xFF4776D0),Color(0xFF6957D8),Color(0xFF9256D8),Color(0xFFB04FC4),Color(0xFFD34F9A),Color(0xFFE65376),Color(0xFFE66A4C),Color(0xFFE99A3D),Color(0xFFD6B43D),Color(0xFF9AB94A),Color(0xFF55B78A),Color(0xFF39BDBD),Color(0xFFE9BD68)];
+    const colors = [Color(0xFF9E9E9E),Color(0xFF8D9AA6),Color(0xFF69A7C8),Color(0xFF4E91D8),Color(0xFF4776D0),Color(0xFF6957D8),Color(0xFF9256D8),Color(0xFFB04FC4),Color(0xFFD34F9A),Color(0xFFE65376),Color(0xFFE66A4C),Color(0xFFE99A3D),Color(0xFFD6B43D),Color(0xFF9AB94A),Color(0xFF55B78A),Color(0xFF39BDBD),Color(0xFFFFC86B)];
     final level = n.clamp(1,17).toInt();
     return colors[level-1];
   }
