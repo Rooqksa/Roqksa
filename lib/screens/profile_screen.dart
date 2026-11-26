@@ -203,9 +203,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 23),
                   const Row(children: [
-                    Expanded(child: _ProfileStat(value: '—', label: 'المتابعة')),
-                    Expanded(child: _ProfileStat(value: '—', label: 'المعجبون')),
-                    Expanded(child: _ProfileStat(value: '—', label: 'الزوار')),
+                    Expanded(child: _ProfileStat(value: '—', label: 'المتابعة', icon: Icons.people_outline_rounded)),
+                    Expanded(child: _ProfileStat(value: '—', label: 'المعجبون', icon: Icons.favorite_border_rounded)),
+                    Expanded(child: _ProfileStat(value: '—', label: 'الزوار', icon: Icons.visibility_outlined)),
                   ]),
                 ],
               ),
