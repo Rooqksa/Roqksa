@@ -148,6 +148,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF192A3B),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: gold.withValues(alpha: .18)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.workspace_premium_rounded, color: gold, size: 19),
+                    const SizedBox(width: 7),
+                    const Expanded(
+                      child: Text(
+                        'الرتبة والألقاب',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: gold.withValues(alpha: .14),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'VIP 1',
+                        style: TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    _IdentityBadge(label: 'عضو Roqksa', icon: Icons.person_rounded, color: const Color(0xFF5DE0D7)),
+                    _IdentityBadge(label: 'محب الألعاب', icon: Icons.sports_esports_rounded, color: const Color(0xFF69B7E8)),
+                    _IdentityBadge(label: 'صديق المجتمع', icon: Icons.diversity_3_rounded, color: const Color(0xFFB49BFF)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'الألقاب المعروضة تجريبية؛ منح الألقاب ومستويات VIP الفعلية يتطلب صلاحيات وخدمات خلفية.',
+                  style: TextStyle(color: Colors.white38, fontSize: 10, height: 1.4),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 18),
           Row(
             children: const [
@@ -238,6 +290,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(color: Colors.white.withValues(alpha: .38), fontSize: 11),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IdentityBadge extends StatelessWidget {
+  const _IdentityBadge({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: .28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 14),
+          const SizedBox(width: 5),
+          Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700)),
         ],
       ),
     );
