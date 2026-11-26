@@ -13,8 +13,8 @@ class RoqksaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const aqua = Color(0xFF27D7D0);
-    const deepNavy = Color(0xFF101C2B);
-    const panel = Color(0xFF192A3B);
+    const deepNavy = Color(0xFF0B1925);
+    const panel = Color(0xFF172B3B);
     final scheme = ColorScheme.fromSeed(
       seedColor: aqua,
       brightness: Brightness.dark,
@@ -35,7 +35,7 @@ class RoqksaApp extends StatelessWidget {
           centerTitle: false,
         ),
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF142437),
+          backgroundColor: const Color(0xFF102333),
           indicatorColor: aqua.withValues(alpha: .22),
           labelTextStyle: WidgetStateProperty.resolveWith((states) =>
             TextStyle(
