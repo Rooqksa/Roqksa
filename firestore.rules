@@ -72,6 +72,28 @@ service cloud.firestore {
 
     // Friendship records are trusted-server managed. Clients cannot grant
     // themselves friend status by writing an "accepted" relationship.
+    // Profile visits: each signed-in visitor has one document per profile.
+    // Only the visitor can create/update their own visit timestamp; only the
+    // profile owner can read the visitor list. Clients cannot delete records.
+    match /profileVisits/{ownerUid}/visitors/{visitorUid} {
+      allow read: if isSelf(ownerUid);
+      allow create: if signedIn()
+        && request.auth.uid == visitorUid
+        && ownerUid != visitorUid
+        && request.resource.data.keys().hasOnly(['ownerId', 'visitorId', 'lastVisitedAt'])
+        && request.resource.data.ownerId == ownerUid
+        && request.resource.data.visitorId == request.auth.uid
+        && request.resource.data.lastVisitedAt == request.time;
+      allow update: if signedIn()
+        && request.auth.uid == visitorUid
+        && ownerUid != visitorUid
+        && resource.data.ownerId == ownerUid
+        && resource.data.visitorId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastVisitedAt'])
+        && request.resource.data.lastVisitedAt == request.time;
+      allow delete: if false;
+    }
+
     match /friendships/{uid}/friends/{friendUid} {
       allow read: if isSelf(uid);
       allow write: if false;
