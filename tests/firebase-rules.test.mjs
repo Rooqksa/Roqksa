@@ -55,6 +55,27 @@ test('users can create only their own profile with the allowed fields', async ()
     displayName: 'Alice',
     password: 'must-not-be-stored',
   }));
+
+  await assertFails(getDoc(doc(db, 'users/bob')));
+  const publicProfile = {
+    uid: 'alice',
+    displayName: 'Alice',
+    photoUrl: null,
+    bio: 'Hello',
+    giftsCount: 0,
+    postsCount: 0,
+  };
+  await assertSucceeds(setDoc(doc(db, 'publicProfiles/alice'), publicProfile));
+  const bob = testEnv.authenticatedContext('bob').firestore();
+  await assertSucceeds(getDoc(doc(bob, 'publicProfiles/alice')));
+  await assertFails(getDoc(doc(bob, 'users/alice')));
+  await assertFails(setDoc(doc(db, 'publicProfiles/bob'), {
+    ...publicProfile,
+    uid: 'bob',
+  }));
+  await assertFails(updateDoc(doc(db, 'publicProfiles/alice'), {
+    giftsCount: 500,
+  }));
 });
 
 test('conversation data and messages are limited to members', async () => {
