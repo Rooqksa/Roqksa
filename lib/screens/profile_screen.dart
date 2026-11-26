@@ -530,19 +530,13 @@ class _ProfileStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFF192A3B),
-        borderRadius: BorderRadius.circular(16),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFFFC86B), size: 19),
-          const SizedBox(height: 7),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 3),
-          Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
+          Text(value, style: const TextStyle(color: Color(0xFF292929), fontSize: 24, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 5),
+          Text(label, style: const TextStyle(color: Color(0xFF969696), fontSize: 12, fontWeight: FontWeight.w600)),
         ],
       ),
     );
