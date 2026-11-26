@@ -7,9 +7,21 @@ import 'screens/auth_screen.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Android reads the default Firebase app configuration generated from
-  // android/app/google-services.json by the Google Services Gradle plugin.
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+  if (kIsWeb) {
+    // Firebase web app configuration from the Roqksa Firebase project.
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyCC_8sBR-sG0Bw3kACknLgyQY3gL-OY7mM',
+        authDomain: 'roqksa.firebaseapp.com',
+        projectId: 'roqksa',
+        storageBucket: 'roqksa.firebasestorage.app',
+        messagingSenderId: '826610594194',
+        appId: '1:826610594194:web:0f244dabe64493efe0514b',
+        measurementId: 'G-70KQKQXV4N',
+      ),
+    );
+  } else if (defaultTargetPlatform == TargetPlatform.android) {
+    // Android reads its configuration from android/app/google-services.json.
     await Firebase.initializeApp();
   }
 
