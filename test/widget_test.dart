@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:roqksa/main.dart';
 import 'package:roqksa/screens/game_screen.dart';
+import 'package:roqksa/screens/room_screen.dart';
 
 void main() {
   testWidgets('Roqksa demo sign-in opens profile and messages tabs', (tester) async {
@@ -184,4 +185,31 @@ void main() {
     }
   });
 
+ 
+  testWidgets('room controls update local mic, seat request and likes', (tester) async {
+    await tester.view.setPhysicalSize(const Size(1080, 1920));
+    await tester.view.setDevicePixelRatio(1);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: RoomScreen(roomName: 'غرفة الاختبار'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('غرفة الاختبار'), findsOneWidget);
+    await tester.tap(find.text('طلب المايك'));
+    await tester.pumpAndSettle();
+    expect(find.text('إلغاء الطلب'), findsOneWidget);
+
+    await tester.tap(find.text('مقعد فارغ').first);
+    await tester.pumpAndSettle();
+    expect(find.text('طلبك قيد الانتظار'), findsOneWidget);
+
+    await tester.tap(find.text('128'));
+    await tester.pumpAndSettle();
+    expect(find.text('129'), findsOneWidget);
+
+    await tester.view.resetPhysicalSize();
+    await tester.view.resetDevicePixelRatio();
+  });
+ 
 }
