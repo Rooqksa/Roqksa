@@ -132,7 +132,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(const MaterialApp(
-      home: RoomScreen(roomName: 'غرفة الاختبار'),
+      home: RoomScreen(roomName: 'غرفة الاختبار', roomId: 'test-room'),
     ));
     await tester.pumpAndSettle();
 
