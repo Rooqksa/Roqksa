@@ -27,7 +27,7 @@ async function activeParticipant(roomId, uid) {
   return snap.exists && snap.get("status") === "active";
 }
 
-exports.joinVoiceRoom = onCall({ region: REGION, enforceAppCheck: true }, async (request) => {
+exports.joinVoiceRoom = onCall({ region: REGION }, async (request) => {
   const uid = requireAuth(request);
   const roomId = requireId(request.data?.roomId, "roomId");
   const roomRef = db.doc(`rooms/${roomId}`);
@@ -56,7 +56,7 @@ exports.joinVoiceRoom = onCall({ region: REGION, enforceAppCheck: true }, async 
   return { roomId, uid, role: isHost ? "host" : "listener" };
 });
 
-exports.leaveVoiceRoom = onCall({ region: REGION, enforceAppCheck: true }, async (request) => {
+exports.leaveVoiceRoom = onCall({ region: REGION }, async (request) => {
   const uid = requireAuth(request);
   const roomId = requireId(request.data?.roomId, "roomId");
   const participantRef = db.doc(`rooms/${roomId}/participants/${uid}`);
@@ -73,7 +73,7 @@ exports.leaveVoiceRoom = onCall({ region: REGION, enforceAppCheck: true }, async
   return { roomId, left: true };
 });
 
-exports.sendVoiceSignal = onCall({ region: REGION, enforceAppCheck: true }, async (request) => {
+exports.sendVoiceSignal = onCall({ region: REGION }, async (request) => {
   const senderUid = requireAuth(request);
   const roomId = requireId(request.data?.roomId, "roomId");
   const targetUid = requireId(request.data?.targetUid, "targetUid");
