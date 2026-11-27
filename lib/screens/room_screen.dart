@@ -92,8 +92,11 @@ class _RoomScreenState extends State<RoomScreen> {
     '20',
     '16',
     '14',
+    '20 VIP',
+    '10 VIP',
+    '24',
   ];
-  static const _seatCounts = [12, 10, 8, 20, 16, 14];
+  static const _seatCounts = [12, 10, 8, 20, 16, 14, 20, 10, 24];
 
   void _showSeatLayouts() {
     showDialog<void>(
@@ -143,7 +146,8 @@ class _RoomScreenState extends State<RoomScreen> {
                               alignment: Alignment(point.dx * 2 - 1, point.dy * 2 - 1),
                               child: Column(mainAxisSize: MainAxisSize.min, children: [
                                 Container(
-                                  width: 18, height: 18,
+                                  width: (i == 6 || i == 7) && entry.key < 2 ? 25 : 18,
+                                  height: (i == 6 || i == 7) && entry.key < 2 ? 25 : 18,
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF102F40),
                                     shape: BoxShape.circle,
@@ -191,31 +195,35 @@ class _RoomScreenState extends State<RoomScreen> {
 
   List<Offset> _seatPoints(int layout) {
     final count = _seatCounts[layout];
-
-    // 8 مقاعد دائرية حول مايك في الوسط.
     if (layout == 2) {
       return List.generate(8, (i) {
         final angle = -math.pi / 2 + (2 * math.pi * i / 8);
         return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
       });
     }
-
-    // تخطيطات 10 و14 و20: مقعدا المتحدثين بالأعلى وبقية المقاعد أسفلها.
-    if (layout == 1 || layout == 5 || layout == 3) {
+    if (layout == 1 || layout == 5 || layout == 3 || layout == 7) {
       final remaining = count - 2;
       final columns = layout == 3 ? 6 : 4;
       final rows = (remaining / columns).ceil();
       return [
-        const Offset(.38, .12),
-        const Offset(.62, .12),
+        const Offset(.38, .12), const Offset(.62, .12),
         ...List.generate(remaining, (i) => Offset(
           ((i % columns) + .5) / columns,
           .38 + ((i ~/ columns) + .5) / rows * .55,
         )),
       ];
     }
-
-    // تخطيطات 12 و16 بالشبكة المنتظمة.
+    if (layout == 6) {
+      const vip = [Offset(.25, .15), Offset(.75, .15), Offset(.25, .43), Offset(.75, .43)];
+      return [...vip, ...List.generate(16, (i) => Offset(
+        ((i % 6) + .5) / 6, .68 + (i ~/ 6) * .19,
+      ))];
+    }
+    if (layout == 8) {
+      return List.generate(24, (i) => Offset(
+        ((i % 6) + .5) / 6, ((i ~/ 6) + .5) / 4,
+      ));
+    }
     final columns = 4;
     final rows = (count / columns).ceil();
     return List.generate(count, (i) => Offset(
