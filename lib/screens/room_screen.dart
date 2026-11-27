@@ -218,8 +218,6 @@ class _RoomScreenState extends State<RoomScreen> {
   }
 
   Widget _seatsArea() => LayoutBuilder(builder: (context, constraints) {
-    final w = constraints.maxWidth;
-    final h = constraints.maxHeight;
     final points = _seatPoints(seatLayout);
     return Padding(
       padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
