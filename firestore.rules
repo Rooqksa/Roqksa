@@ -209,8 +209,7 @@ service cloud.firestore {
         // Incoming-signal listeners query only the signed-in recipient's queue.
         allow list: if signedIn()
           && resource.data.targetUid == request.auth.uid
-          && isRoomParticipant(roomId)
-          && isActiveRoomParticipant(roomId, resource.data.senderUid);
+          && isRoomParticipant(roomId);
         // Only Admin SDK callable functions may publish signaling documents.
         allow create, update: if false;
         // The recipient may remove a signal after processing it.
