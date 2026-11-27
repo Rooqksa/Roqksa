@@ -10,7 +10,7 @@ class VoiceSignalingService {
     FirebaseFunctions? functions,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _functions = functions ??
-            FirebaseFunctions.instanceFor(region: 'us-central1');
+            FirebaseFunctions.instanceFor(region: 'me-central2');
 
   final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
