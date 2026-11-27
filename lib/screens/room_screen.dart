@@ -646,23 +646,23 @@ class _RoomScreenState extends State<RoomScreen> {
   Widget _buildControls() => Container(
     padding: const EdgeInsets.fromLTRB(5, 7, 5, 9),
     decoration: BoxDecoration(color: const Color(0xFF102A3A).withValues(alpha: .94), borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), border: Border(top: BorderSide(color: Colors.white.withValues(alpha: .10)))),
-    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', color: Colors.white, onTap: _exitRoom),
-      _RoomButton(icon: Icons.card_giftcard_rounded, label: 'هدايا', color: const Color(0xFFFFC96B), onTap: openGifts),
-      _RoomButton(
+    child: Row(children: [
+      Expanded(child: _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', color: Colors.white, onTap: _exitRoom)),
+      Expanded(child: _RoomButton(icon: Icons.card_giftcard_rounded, label: 'هدايا', color: const Color(0xFFFFC96B), onTap: openGifts)),
+      Expanded(child: _RoomButton(
         icon: voiceConnected ? Icons.call_end_rounded : Icons.headset_mic_rounded,
         label: voiceBusy ? 'جارٍ الاتصال' : (voiceConnected ? 'قطع الصوت' : 'اتصال صوتي'),
         color: voiceConnected ? const Color(0xFFFF7777) : const Color(0xFF53E4D0),
         onTap: voiceConnected ? _stopVoice : _startVoice,
-      ),
-      _RoomButton(
+      )),
+      Expanded(child: _RoomButton(
         icon: microphoneEnabled ? Icons.mic_rounded : Icons.mic_off_rounded,
         label: microphoneEnabled ? 'كتم المايك' : 'تشغيل المايك',
         color: const Color(0xFFB86BFF),
         onTap: _toggleMicrophone,
-      ),
-      _RoomButton(icon: speakerEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: speakerEnabled ? 'الصوت' : 'صامت', color: Colors.white, onTap: () => setState(() => speakerEnabled = !speakerEnabled)),
-      _RoomButton(icon: Icons.more_horiz_rounded, label: 'الخيارات', color: Colors.white, onTap: _showRoomMenu),
+      )),
+      Expanded(child: _RoomButton(icon: speakerEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: speakerEnabled ? 'الصوت' : 'صامت', color: Colors.white, onTap: () => setState(() => speakerEnabled = !speakerEnabled))),
+      Expanded(child: _RoomButton(icon: Icons.more_horiz_rounded, label: 'الخيارات', color: Colors.white, onTap: _showRoomMenu)),
     ]),
   );
 }
