@@ -83,29 +83,150 @@ class _RoomScreenState extends State<RoomScreen> {
     ]),
   );
 
+  int seatLayout = 0;
+
+  static const _seatLayoutNames = [
+    '20 مقعداً - صفوف',
+    '20 مقعداً - مستطيل',
+    '16 مقعداً - شكل U',
+    '12 مقعداً - نصف دائرة',
+    '8 مقاعد - دائرة والمايك في الوسط',
+  ];
+
+  void _showSeatLayouts() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF073A48),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('اختر شكل المقاعد',
+              style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            ...List.generate(_seatLayoutNames.length, (i) => ListTile(
+              leading: Icon(
+                i == 4 ? Icons.circle_outlined : i == 2 ? Icons.u_turn_left : Icons.event_seat,
+                color: seatLayout == i ? aqua : Colors.white70,
+              ),
+              title: Text(_seatLayoutNames[i],
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              trailing: seatLayout == i ? const Icon(Icons.check_circle, color: aqua) : null,
+              onTap: () {
+                setState(() => seatLayout = i);
+                Navigator.pop(ctx);
+              },
+            )),
+          ]),
+        ),
+      ),
+    );
+  }
+
+  List<Offset> _seatPoints(int layout) {
+    if (layout == 0 || layout == 1) {
+      final columns = layout == 0 ? 5 : 4;
+      final rows = layout == 0 ? 4 : 5;
+      return List.generate(columns * rows, (i) {
+        final col = i % columns;
+        final row = i ~/ columns;
+        return Offset((col + .5) / columns, (row + .5) / rows);
+      });
+    }
+    if (layout == 2) {
+      final points = <Offset>[];
+      for (var i = 0; i < 4; i++) {
+        points.add(Offset(.10, .22 + i * .19));
+      }
+      for (var i = 0; i < 8; i++) {
+        points.add(Offset(.19 + i * .089, .84));
+      }
+      for (var i = 0; i < 4; i++) {
+        points.add(Offset(.90, .79 - i * .19));
+      }
+      return points;
+    }
+    if (layout == 3) {
+      return List.generate(12, (i) {
+        final angle = math.pi + (math.pi * i / 11);
+        return Offset(.5 + .39 * math.cos(angle), .84 + .48 * math.sin(angle));
+      });
+    }
+    return List.generate(8, (i) {
+      final angle = -math.pi / 2 + (2 * math.pi * i / 8);
+      return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
+    });
+  }
+
   Widget _seatsArea() => LayoutBuilder(builder: (context, constraints) {
     final w = constraints.maxWidth;
-    return Padding(padding: const EdgeInsets.fromLTRB(13, 3, 13, 0), child: Column(children: [
-      SizedBox(height: constraints.maxHeight * .24, child: Row(children: [
-        const Spacer(), SizedBox(width: w * .24, child: _seat(0, 'روّق', occupied: true, host: true)),
-        const SizedBox(width: 15), SizedBox(width: w * .24, child: _seat(1, 'S1', locked: true)), const Spacer(),
-      ])),
-      SizedBox(height: constraints.maxHeight * .31, child: Row(children: [
-        Expanded(child: _seat(2, '4')), Expanded(child: _seat(3, '3')),
-        Expanded(child: _seat(4, 'شخصية مفضولة', occupied: true, vip: 'V7')),
-        Expanded(child: _seat(5, 'ســعــد', occupied: true, vip: 'V2')),
-      ])),
-      Expanded(child: Row(children: [
-        Expanded(child: _seat(6, '8')), Expanded(child: _seat(7, '7')),
-        Expanded(child: _seat(8, '6')), Expanded(child: _seat(9, '5')),
-      ])),
-      Align(alignment: Alignment.centerLeft, child: Container(
-        margin: const EdgeInsets.only(left: 4, top: 3, bottom: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
-        decoration: BoxDecoration(color: Colors.black.withOpacity(.22), borderRadius: BorderRadius.circular(22)),
-        child: const Text('0  ♙', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      )),
-    ]));
+    final h = constraints.maxHeight;
+    final points = _seatPoints(seatLayout);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
+      child: Column(children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: InkWell(
+            onTap: _showSeatLayouts,
+            borderRadius: BorderRadius.circular(22),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(.28),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: aqua.withOpacity(.55)),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.event_seat, color: aqua, size: 17),
+                const SizedBox(width: 6),
+                Text(_seatLayoutNames[seatLayout],
+                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 5),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 17),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Expanded(child: LayoutBuilder(builder: (context, area) {
+          final areaW = area.maxWidth;
+          final areaH = area.maxHeight;
+          return Stack(clipBehavior: Clip.hardEdge, children: [
+            for (var i = 0; i < points.length; i++)
+              Positioned(
+                left: (points[i].dx * areaW - 35).clamp(0.0, areaW - 70).toDouble(),
+                top: (points[i].dy * areaH - 39).clamp(0.0, areaH - 78).toDouble(),
+                child: SizedBox(
+                  width: 70,
+                  height: 78,
+                  child: _seat(i, 'مقعد ${i + 1}',
+                    occupied: i == 0,
+                    host: i == 0,
+                    locked: i == 1),
+                ),
+              ),
+            if (seatLayout == 4)
+              Positioned(
+                left: areaW / 2 - 27,
+                top: areaH / 2 - 27,
+                child: Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF102D43),
+                    border: Border.all(color: aqua, width: 2),
+                    boxShadow: [BoxShadow(color: aqua.withOpacity(.4), blurRadius: 16)],
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 29),
+                ),
+              ),
+          ]);
+        })),
+      ]),
+    );
   });
 
   Widget _seat(int index, String name, {bool occupied = false, bool locked = false, bool host = false, String? vip}) =>
