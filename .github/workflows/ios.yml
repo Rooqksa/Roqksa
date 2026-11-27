@@ -2,7 +2,7 @@ name: iOS build
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/free-webrtc-audio-foundation]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -38,6 +38,10 @@ jobs:
 
       - name: Generate iOS project
         run: flutter create --platforms=ios --org com.roqksa .
+
+      - name: Declare microphone permission for WebRTC
+        run: |
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'يحتاج Roqksa إلى الميكروفون للمشاركة في الغرف الصوتية.'" ios/Runner/Info.plist
 
       - name: Install dependencies
         run: flutter pub get
