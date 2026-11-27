@@ -83,29 +83,221 @@ class _RoomScreenState extends State<RoomScreen> {
     ]),
   );
 
+  int seatLayout = 0;
+
+  static const _seatLayoutNames = [
+    '12',
+    '10',
+    '8',
+    '20',
+    '16',
+    '14',
+    '20 VIP',
+    '10 VIP',
+    '24',
+  ];
+  static const _seatCounts = [12, 10, 8, 20, 16, 14, 20, 10, 24];
+
+  void _showSeatLayouts() {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+        backgroundColor: const Color(0xFFFDFDFD),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: SizedBox(
+          height: MediaQuery.of(ctx).size.height * .86,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 18, 12, 14),
+            child: Column(children: [
+              const Text('عدد المقاعد',
+                style: TextStyle(color: Color(0xFF20212B), fontSize: 25, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 16),
+              Expanded(child: GridView.builder(
+                itemCount: _seatCounts.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, crossAxisSpacing: 9, mainAxisSpacing: 10,
+                  childAspectRatio: .82,
+                ),
+                itemBuilder: (context, i) {
+                  final selected = seatLayout == i;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => setState(() => seatLayout = i),
+                    child: Column(children: [
+                      Expanded(child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                            colors: [Color(0xFF064354), Color(0xFF087F91), Color(0xFF08AFC1)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: selected ? const Color(0xFF19D3C6) : Colors.transparent, width: 3),
+                        ),
+                        child: Stack(children: [
+                          if (selected) const Positioned(left: 8, top: 8,
+                            child: Icon(Icons.check_circle, color: Color(0xFF19D3C6), size: 28)),
+                          ..._seatPoints(i).asMap().entries.map((entry) {
+                            final point = entry.value;
+                            final speakerSeat = (i == 1 || i == 3 || i == 5) && entry.key < 2;
+                            return Align(
+                              alignment: Alignment(point.dx * 2 - 1, point.dy * 2 - 1),
+                              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                Container(
+                                  width: (i == 6 || i == 7) && entry.key < 2 ? 25 : 18,
+                                  height: (i == 6 || i == 7) && entry.key < 2 ? 25 : 18,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF102F40),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white54, width: .8),
+                                  ),
+                                  child: const Icon(Icons.mic, color: Colors.white, size: 10),
+                                ),
+                                if (speakerSeat)
+                                  Text('S${entry.key + 1}', style: const TextStyle(color: Colors.white, fontSize: 6, height: 1)),
+                              ]),
+                            );
+                          }),
+                          if (i == 1) const Positioned(left: 0, right: 0, top: 13,
+                            child: Icon(Icons.mic, color: Color(0xFFB8FFF4), size: 16)),
+                          if (i == 2) const Positioned(left: 0, right: 0, top: 0, bottom: 0,
+                            child: Center(child: Icon(Icons.mic, color: Color(0xFFB8FFF4), size: 19))),
+                        ]),
+                      )),
+                      const SizedBox(height: 5),
+                      Text(_seatLayoutNames[i], style: TextStyle(
+                        color: selected ? const Color(0xFF19CDBF) : Colors.grey.shade600,
+                        fontSize: 22, fontWeight: FontWeight.w800)),
+                    ]),
+                  );
+                },
+              )),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, height: 54,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF19CDBF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('حسناً', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Offset> _seatPoints(int layout) {
+    final count = _seatCounts[layout];
+    if (layout == 2) {
+      return List.generate(8, (i) {
+        final angle = -math.pi / 2 + (2 * math.pi * i / 8);
+        return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
+      });
+    }
+    if (layout == 1 || layout == 5 || layout == 3 || layout == 7) {
+      final remaining = count - 2;
+      final columns = layout == 3 ? 6 : 4;
+      final rows = (remaining / columns).ceil();
+      return [
+        const Offset(.38, .12), const Offset(.62, .12),
+        ...List.generate(remaining, (i) => Offset(
+          ((i % columns) + .5) / columns,
+          .38 + ((i ~/ columns) + .5) / rows * .55,
+        )),
+      ];
+    }
+    if (layout == 6) {
+      const vip = [Offset(.25, .15), Offset(.75, .15), Offset(.25, .43), Offset(.75, .43)];
+      return [...vip, ...List.generate(16, (i) => Offset(
+        ((i % 6) + .5) / 6, .68 + (i ~/ 6) * .19,
+      ))];
+    }
+    if (layout == 8) {
+      return List.generate(24, (i) => Offset(
+        ((i % 6) + .5) / 6, ((i ~/ 6) + .5) / 4,
+      ));
+    }
+    final columns = 4;
+    final rows = (count / columns).ceil();
+    return List.generate(count, (i) => Offset(
+      ((i % columns) + .5) / columns,
+      ((i ~/ columns) + .5) / rows,
+    ));
+  }
+
   Widget _seatsArea() => LayoutBuilder(builder: (context, constraints) {
-    final w = constraints.maxWidth;
-    return Padding(padding: const EdgeInsets.fromLTRB(13, 3, 13, 0), child: Column(children: [
-      SizedBox(height: constraints.maxHeight * .24, child: Row(children: [
-        const Spacer(), SizedBox(width: w * .24, child: _seat(0, 'روّق', occupied: true, host: true)),
-        const SizedBox(width: 15), SizedBox(width: w * .24, child: _seat(1, 'S1', locked: true)), const Spacer(),
-      ])),
-      SizedBox(height: constraints.maxHeight * .31, child: Row(children: [
-        Expanded(child: _seat(2, '4')), Expanded(child: _seat(3, '3')),
-        Expanded(child: _seat(4, 'شخصية مفضولة', occupied: true, vip: 'V7')),
-        Expanded(child: _seat(5, 'ســعــد', occupied: true, vip: 'V2')),
-      ])),
-      Expanded(child: Row(children: [
-        Expanded(child: _seat(6, '8')), Expanded(child: _seat(7, '7')),
-        Expanded(child: _seat(8, '6')), Expanded(child: _seat(9, '5')),
-      ])),
-      Align(alignment: Alignment.centerLeft, child: Container(
-        margin: const EdgeInsets.only(left: 4, top: 3, bottom: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
-        decoration: BoxDecoration(color: Colors.black.withOpacity(.22), borderRadius: BorderRadius.circular(22)),
-        child: const Text('0  ♙', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      )),
-    ]));
+    final points = _seatPoints(seatLayout);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
+      child: Column(children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: InkWell(
+            onTap: _showSeatLayouts,
+            borderRadius: BorderRadius.circular(22),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(.28),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: aqua.withOpacity(.55)),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.event_seat, color: aqua, size: 17),
+                const SizedBox(width: 6),
+                Text(_seatLayoutNames[seatLayout],
+                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 5),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 17),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Expanded(child: LayoutBuilder(builder: (context, area) {
+          final areaW = area.maxWidth;
+          final areaH = area.maxHeight;
+          return Stack(clipBehavior: Clip.hardEdge, children: [
+            for (var i = 0; i < points.length; i++)
+              Positioned(
+                left: (points[i].dx * areaW - 35).clamp(0.0, areaW - 70).toDouble(),
+                top: (points[i].dy * areaH - 39).clamp(0.0, areaH - 78).toDouble(),
+                child: SizedBox(
+                  width: 70,
+                  height: 78,
+                  child: _seat(i, 'مقعد ${i + 1}',
+                    occupied: i == 0,
+                    host: i == 0,
+                    locked: i == 1),
+                ),
+              ),
+            if (seatLayout == 2)
+              Positioned(
+                left: areaW / 2 - 27,
+                top: areaH / 2 - 27,
+                child: Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF102D43),
+                    border: Border.all(color: aqua, width: 2),
+                    boxShadow: [BoxShadow(color: aqua.withOpacity(.4), blurRadius: 16)],
+                  ),
+                  child: const Icon(Icons.mic, color: Colors.white, size: 29),
+                ),
+              ),
+          ]);
+        })),
+      ]),
+    );
   });
 
   Widget _seat(int index, String name, {bool occupied = false, bool locked = false, bool host = false, String? vip}) =>
