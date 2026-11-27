@@ -26,7 +26,12 @@ class WebRtcAudioService {
       },
       'video': false,
     });
-    _muted = false;
+
+    // الأمان أولاً: أي مسار صوت جديد يبدأ مكتوماً قبل إضافته إلى أي PeerConnection.
+    for (final track in _localStream!.getAudioTracks()) {
+      track.enabled = false;
+    }
+    _muted = true;
   }
 
   /// ينشئ اتصال نظير واحداً. تمرر إعدادات ICE من الخادم/البيئة،
