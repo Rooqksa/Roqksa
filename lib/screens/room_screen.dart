@@ -263,7 +263,7 @@ class _RoomScreenState extends State<RoomScreen> {
                     locked: i == 1),
                 ),
               ),
-            if (seatLayout == 4)
+            if (seatLayout == 2)
               Positioned(
                 left: areaW / 2 - 27,
                 top: areaH / 2 - 27,
