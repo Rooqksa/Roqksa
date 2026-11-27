@@ -86,77 +86,135 @@ class _RoomScreenState extends State<RoomScreen> {
   int seatLayout = 0;
 
   static const _seatLayoutNames = [
-    '20 مقعداً - صفوف',
-    '20 مقعداً - مستطيل',
-    '16 مقعداً - شكل U',
-    '12 مقعداً - نصف دائرة',
-    '8 مقاعد - دائرة والمايك في الوسط',
+    '12',
+    '10',
+    '8',
+    '20',
+    '16',
+    '14',
   ];
+  static const _seatCounts = [12, 10, 8, 20, 16, 14];
 
   void _showSeatLayouts() {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      backgroundColor: const Color(0xFF073A48),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('اختر شكل المقاعد',
-              style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            ...List.generate(_seatLayoutNames.length, (i) => ListTile(
-              leading: Icon(
-                i == 4 ? Icons.circle_outlined : i == 2 ? Icons.u_turn_left : Icons.event_seat,
-                color: seatLayout == i ? aqua : Colors.white70,
+      barrierColor: Colors.black54,
+      builder: (ctx) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+        backgroundColor: const Color(0xFFFDFDFD),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        child: SizedBox(
+          height: MediaQuery.of(ctx).size.height * .86,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 18, 12, 14),
+            child: Column(children: [
+              const Text('عدد المقاعد',
+                style: TextStyle(color: Color(0xFF20212B), fontSize: 25, fontWeight: FontWeight.w900)),
+              const SizedBox(height: 16),
+              Expanded(child: GridView.builder(
+                itemCount: _seatCounts.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, crossAxisSpacing: 9, mainAxisSpacing: 10,
+                  childAspectRatio: .82,
+                ),
+                itemBuilder: (context, i) {
+                  final selected = seatLayout == i;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => setState(() => seatLayout = i),
+                    child: Column(children: [
+                      Expanded(child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                            colors: [Color(0xFF064354), Color(0xFF087F91), Color(0xFF08AFC1)],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: selected ? const Color(0xFF19D3C6) : Colors.transparent, width: 3),
+                        ),
+                        child: Stack(children: [
+                          if (selected) const Positioned(left: 8, top: 8,
+                            child: Icon(Icons.check_circle, color: Color(0xFF19D3C6), size: 28)),
+                          ...List.generate(_seatCounts[i], (n) {
+                            final cols = i == 2 ? 4 : (i == 0 ? 4 : (i == 3 ? 5 : 4));
+                            final rows = (_seatCounts[i] / cols).ceil();
+                            final x = ((n % cols) + .5) / cols;
+                            final y = ((n ~/ cols) + .5) / rows;
+                            return Align(
+                              alignment: Alignment(x * 2 - 1, y * 2 - 1),
+                              child: Container(
+                                width: 18, height: 18,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF102F40),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white54, width: .8),
+                                ),
+                                child: const Icon(Icons.mic, color: Colors.white, size: 10),
+                              ),
+                            );
+                          }),
+                          if (i == 1) const Positioned(left: 0, right: 0, top: 13,
+                            child: Icon(Icons.mic, color: Color(0xFFB8FFF4), size: 16)),
+                          if (i == 2) const Positioned(left: 0, right: 0, top: 0, bottom: 0,
+                            child: Center(child: Icon(Icons.mic, color: Color(0xFFB8FFF4), size: 19))),
+                        ]),
+                      )),
+                      const SizedBox(height: 5),
+                      Text(_seatLayoutNames[i], style: TextStyle(
+                        color: selected ? const Color(0xFF19CDBF) : Colors.grey.shade600,
+                        fontSize: 22, fontWeight: FontWeight.w800)),
+                    ]),
+                  );
+                },
+              )),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, height: 54,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF19CDBF),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('حسناً', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
+                ),
               ),
-              title: Text(_seatLayoutNames[i],
-                textDirection: TextDirection.rtl,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              trailing: seatLayout == i ? const Icon(Icons.check_circle, color: aqua) : null,
-              onTap: () {
-                setState(() => seatLayout = i);
-                Navigator.pop(ctx);
-              },
-            )),
-          ]),
+            ]),
+          ),
         ),
       ),
     );
   }
 
   List<Offset> _seatPoints(int layout) {
-    if (layout == 0 || layout == 1) {
-      final columns = layout == 0 ? 5 : 4;
-      final rows = layout == 0 ? 4 : 5;
-      return List.generate(columns * rows, (i) {
-        final col = i % columns;
-        final row = i ~/ columns;
-        return Offset((col + .5) / columns, (row + .5) / rows);
-      });
-    }
+    final count = _seatCounts[layout];
     if (layout == 2) {
-      final points = <Offset>[];
-      for (var i = 0; i < 4; i++) {
-        points.add(Offset(.10, .22 + i * .19));
-      }
-      for (var i = 0; i < 8; i++) {
-        points.add(Offset(.19 + i * .089, .84));
-      }
-      for (var i = 0; i < 4; i++) {
-        points.add(Offset(.90, .79 - i * .19));
-      }
-      return points;
-    }
-    if (layout == 3) {
-      return List.generate(12, (i) {
-        final angle = math.pi + (math.pi * i / 11);
-        return Offset(.5 + .39 * math.cos(angle), .84 + .48 * math.sin(angle));
+      return List.generate(8, (i) {
+        final angle = -math.pi / 2 + (2 * math.pi * i / 8);
+        return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
       });
     }
-    return List.generate(8, (i) {
-      final angle = -math.pi / 2 + (2 * math.pi * i / 8);
-      return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
-    });
+    if (layout == 1) {
+      return [
+        const Offset(.38, .12), const Offset(.62, .12),
+        ...List.generate(8, (i) => Offset(.2 + (i % 4) * .2, .42 + (i ~/ 4) * .35)),
+      ];
+    }
+    if (layout == 5) {
+      return [
+        ...List.generate(4, (i) => Offset(.2 + i * .2, .22)),
+        ...List.generate(4, (i) => Offset(.2 + i * .2, .48)),
+        ...List.generate(4, (i) => Offset(.2 + i * .2, .74)),
+        const Offset(.4, .94), const Offset(.6, .94),
+      ];
+    }
+    final columns = layout == 0 ? 4 : layout == 3 ? 5 : 4;
+    final rows = (count / columns).ceil();
+    return List.generate(count, (i) => Offset(
+      ((i % columns) + .5) / columns,
+      ((i ~/ columns) + .5) / rows,
+    ));
   }
 
   Widget _seatsArea() => LayoutBuilder(builder: (context, constraints) {
