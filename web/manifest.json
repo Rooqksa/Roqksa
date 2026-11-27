@@ -4,7 +4,10 @@
   "start_url": "/Roqksa/",
   "scope": "/Roqksa/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#0B1925",
   "theme_color": "#0B1925",
   "description": "Roqksa - غرف صوتية وتواصل اجتماعي",
@@ -13,10 +16,10 @@
   "dir": "rtl",
   "icons": [
     {
-      "src": "icons/roqksa.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "icons/roqksa-taiger-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
