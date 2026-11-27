@@ -1,7 +1,7 @@
 const crypto = require("node:crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
-const { RtcTokenBuilder, Role } = require("agora-token");
+const { RtcTokenBuilder, RtcRole } = require("agora-token");
 
 const AGORA_APP_ID = "dc8edeee6c3f4ca8bcfd7a73abf3468b";
 const AGORA_APP_CERTIFICATE = defineSecret("AGORA_APP_CERTIFICATE");
@@ -43,7 +43,7 @@ exports.createAgoraRtcToken = onCall(
         certificate,
         channelName,
         uid,
-        Role.PUBLISHER,
+        RtcRole.PUBLISHER,
         TOKEN_TTL_SECONDS,
         TOKEN_TTL_SECONDS
       );
