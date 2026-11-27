@@ -3,6 +3,7 @@ name: Roqksa web preview
 on:
   push:
     branches:
+      - main
       - feature/production-foundation
   workflow_dispatch:
 
