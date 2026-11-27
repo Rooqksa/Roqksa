@@ -202,6 +202,15 @@ test('room host can edit descriptive fields but cannot transfer ownership', asyn
   await assertFails(updateDoc(doc(alice, 'rooms/room-1'), { hostId: 'bob' }));
   await assertFails(updateDoc(doc(alice, 'rooms/room-1'), { participantCount: 99 }));
   await assertFails(updateDoc(doc(bob, 'rooms/room-1'), { title: 'اختراق' }));
+  await assertSucceeds(getDoc(doc(alice, 'rooms/room-1')));
+  await assertFails(getDoc(doc(bob, 'rooms/room-1')));
+
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), 'rooms/public-room'), {
+      hostId: 'alice', title: 'عامة', visibility: 'public', isPrivate: false,
+    });
+  });
+  await assertSucceeds(getDoc(doc(bob, 'rooms/public-room')));
 });
 
 test('voice participants and WebRTC signals are restricted to active room members', async () => {
@@ -231,6 +240,8 @@ test('voice participants and WebRTC signals are restricted to active room member
     where('status', '==', 'active'),
   )));
   await assertFails(getDocs(collection(mallory, 'rooms/voice-1/participants')));
+  await assertSucceeds(getDoc(doc(alice, 'rooms/voice-1')));
+  await assertFails(getDoc(doc(mallory, 'rooms/voice-1')));
   await assertSucceeds(getDocs(query(
     collection(alice, 'rooms/voice-1/rtcSignals'),
     where('targetUid', '==', 'alice'),
