@@ -2,7 +2,7 @@ name: Firebase rules tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/free-webrtc-audio-foundation]
   pull_request:
     branches: [main]
   workflow_dispatch:
