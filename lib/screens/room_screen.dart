@@ -136,22 +136,24 @@ class _RoomScreenState extends State<RoomScreen> {
                         child: Stack(children: [
                           if (selected) const Positioned(left: 8, top: 8,
                             child: Icon(Icons.check_circle, color: Color(0xFF19D3C6), size: 28)),
-                          ...List.generate(_seatCounts[i], (n) {
-                            final cols = i == 2 ? 4 : (i == 0 ? 4 : (i == 3 ? 5 : 4));
-                            final rows = (_seatCounts[i] / cols).ceil();
-                            final x = ((n % cols) + .5) / cols;
-                            final y = ((n ~/ cols) + .5) / rows;
+                          ..._seatPoints(i).asMap().entries.map((entry) {
+                            final point = entry.value;
+                            final speakerSeat = (i == 1 || i == 3 || i == 5) && entry.key < 2;
                             return Align(
-                              alignment: Alignment(x * 2 - 1, y * 2 - 1),
-                              child: Container(
-                                width: 18, height: 18,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF102F40),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white54, width: .8),
+                              alignment: Alignment(point.dx * 2 - 1, point.dy * 2 - 1),
+                              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                Container(
+                                  width: 18, height: 18,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF102F40),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white54, width: .8),
+                                  ),
+                                  child: const Icon(Icons.mic, color: Colors.white, size: 10),
                                 ),
-                                child: const Icon(Icons.mic, color: Colors.white, size: 10),
-                              ),
+                                if (speakerSeat)
+                                  Text('S${entry.key + 1}', style: const TextStyle(color: Colors.white, fontSize: 6, height: 1)),
+                              ]),
                             );
                           }),
                           if (i == 1) const Positioned(left: 0, right: 0, top: 13,
@@ -189,27 +191,32 @@ class _RoomScreenState extends State<RoomScreen> {
 
   List<Offset> _seatPoints(int layout) {
     final count = _seatCounts[layout];
+
+    // 8 مقاعد دائرية حول مايك في الوسط.
     if (layout == 2) {
       return List.generate(8, (i) {
         final angle = -math.pi / 2 + (2 * math.pi * i / 8);
         return Offset(.5 + .36 * math.cos(angle), .5 + .36 * math.sin(angle));
       });
     }
-    if (layout == 1) {
+
+    // تخطيطات 10 و14 و20: مقعدا المتحدثين بالأعلى وبقية المقاعد أسفلها.
+    if (layout == 1 || layout == 5 || layout == 3) {
+      final remaining = count - 2;
+      final columns = layout == 3 ? 6 : 4;
+      final rows = (remaining / columns).ceil();
       return [
-        const Offset(.38, .12), const Offset(.62, .12),
-        ...List.generate(8, (i) => Offset(.2 + (i % 4) * .2, .42 + (i ~/ 4) * .35)),
+        const Offset(.38, .12),
+        const Offset(.62, .12),
+        ...List.generate(remaining, (i) => Offset(
+          ((i % columns) + .5) / columns,
+          .38 + ((i ~/ columns) + .5) / rows * .55,
+        )),
       ];
     }
-    if (layout == 5) {
-      return [
-        ...List.generate(4, (i) => Offset(.2 + i * .2, .22)),
-        ...List.generate(4, (i) => Offset(.2 + i * .2, .48)),
-        ...List.generate(4, (i) => Offset(.2 + i * .2, .74)),
-        const Offset(.4, .94), const Offset(.6, .94),
-      ];
-    }
-    final columns = layout == 0 ? 4 : layout == 3 ? 5 : 4;
+
+    // تخطيطات 12 و16 بالشبكة المنتظمة.
+    final columns = 4;
     final rows = (count / columns).ceil();
     return List.generate(count, (i) => Offset(
       ((i % columns) + .5) / columns,
