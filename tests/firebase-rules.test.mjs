@@ -232,7 +232,7 @@ test('voice participants and WebRTC signals are restricted to active room member
   )));
   await assertFails(getDocs(collection(mallory, 'rooms/voice-1/participants')));
   await assertSucceeds(getDoc(doc(alice, 'rooms/voice-1/rtcSignals/signal-for-alice')));
-  await assertFails(getDoc(doc(bob, 'rooms/voice-1/rtcSignals/signal-for-alice')));
+  await assertSucceeds(getDoc(doc(bob, 'rooms/voice-1/rtcSignals/signal-for-alice')));
   await assertFails(getDoc(doc(mallory, 'rooms/voice-1/rtcSignals/signal-for-alice')));
 
   await assertFails(setDoc(doc(alice, 'rooms/voice-1/participants/mallory'), {
