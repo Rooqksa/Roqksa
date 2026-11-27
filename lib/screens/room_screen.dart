@@ -14,7 +14,6 @@ class RoomScreen extends StatefulWidget {
 }
 
 class _RoomScreenState extends State<RoomScreen> {
-  bool micRequested = false;
   bool voiceConnected = false;
   bool microphoneEnabled = false;
   bool voiceBusy = false;
