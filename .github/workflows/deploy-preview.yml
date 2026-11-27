@@ -38,6 +38,9 @@ jobs:
       - name: Build web preview
         run: flutter build web --release --base-href "/Roqksa/"
 
+      - name: Disable Jekyll processing for Flutter output
+        run: touch build/web/.nojekyll
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
