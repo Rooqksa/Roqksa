@@ -160,12 +160,26 @@ service cloud.firestore {
         && resource.data.ownerId == request.auth.uid;
     }
 
+    function isRoomHost(roomId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/rooms/$(roomId))
+        && get(/databases/$(database)/documents/rooms/$(roomId)).data.hostId == request.auth.uid;
+    }
+
+    function isActiveRoomParticipant(roomId, uid) {
+      return exists(/databases/$(database)/documents/rooms/$(roomId)/participants/$(uid))
+        && get(/databases/$(database)/documents/rooms/$(roomId)/participants/$(uid)).data.status == 'active';
+    }
+
+    function isRoomParticipant(roomId) {
+      return signedIn() && isActiveRoomParticipant(roomId, request.auth.uid);
+    }
+
     match /rooms/{roomId} {
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.hostId == request.auth.uid;
-      // Clients cannot transfer room ownership or alter live-session state.
-      // Trusted backend functions will manage seats, participants and RTC state.
+      // Membership and RTC state are written only by trusted callable functions.
       allow update: if signedIn()
         && resource.data.hostId == request.auth.uid
         && request.resource.data.hostId == resource.data.hostId
@@ -174,6 +188,35 @@ service cloud.firestore {
         ]);
       allow delete: if signedIn()
         && resource.data.hostId == request.auth.uid;
+
+      match /participants/{participantUid} {
+        // Active room members can discover the other participants; users can
+        // also read their own participant record after leaving.
+        allow read: if signedIn()
+          && (participantUid == request.auth.uid
+            || isRoomParticipant(roomId)
+            || isRoomHost(roomId));
+        allow write: if false;
+      }
+
+      match /rtcSignals/{signalId} {
+        // A direct document read is allowed only to the sender or recipient.
+        allow get: if signedIn()
+          && (resource.data.senderUid == request.auth.uid
+            || resource.data.targetUid == request.auth.uid)
+          && isActiveRoomParticipant(roomId, resource.data.senderUid)
+          && isActiveRoomParticipant(roomId, resource.data.targetUid);
+        // Incoming-signal listeners query only the signed-in recipient's queue.
+        allow list: if signedIn()
+          && resource.data.targetUid == request.auth.uid
+          && isRoomParticipant(roomId)
+          && isActiveRoomParticipant(roomId, resource.data.senderUid);
+        // Only Admin SDK callable functions may publish signaling documents.
+        allow create, update: if false;
+        // The recipient may remove a signal after processing it.
+        allow delete: if signedIn()
+          && resource.data.targetUid == request.auth.uid;
+      }
     }
 
     match /reports/{reportId} {

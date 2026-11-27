@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/room_card.dart';
 import 'room_screen.dart';
 import 'profile_screen.dart';
@@ -554,10 +556,55 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  void _openRoom(String roomName) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => RoomScreen(roomName: roomName)),
-    );
+  Future<void> _openRoom(String roomName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('سجّل الدخول أولاً للانضمام إلى الغرفة.')),
+      );
+      return;
+    }
+
+    try {
+      final roomsRef = FirebaseFirestore.instance.collection('rooms');
+      final existing = await roomsRef
+          .where('title', isEqualTo: roomName)
+          .limit(20)
+          .get();
+
+      String? roomId;
+      for (final document in existing.docs) {
+        final data = document.data();
+        if (data['visibility'] == 'public' && data['isPrivate'] != true) {
+          roomId = document.id;
+          break;
+        }
+      }
+
+      if (roomId == null) {
+        final created = await roomsRef.add({
+          'title': roomName,
+          'description': 'غرفة صوتية عامة في Roqksa',
+          'hostId': user.uid,
+          'visibility': 'public',
+          'isPrivate': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        roomId = created.id;
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RoomScreen(roomName: roomName, roomId: roomId!),
+        ),
+      );
+    } on FirebaseException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر فتح الغرفة: ${error.message ?? error.code}')),
+      );
+    }
   }
 
   void _showSearch() {
