@@ -1,0 +1,16 @@
+{
+  "name": "roqksa-functions",
+  "private": true,
+  "description": "Trusted backend for Roqksa room membership and WebRTC signaling",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "node --check index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.3.0"
+  }
+}
