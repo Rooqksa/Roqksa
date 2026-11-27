@@ -4,7 +4,7 @@ const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 initializeApp();
 const db = getFirestore();
-const REGION = "us-central1";
+const REGION = "me-central2";
 const MAX_SIGNAL_BYTES = 64 * 1024;
 
 function requireAuth(request) {
