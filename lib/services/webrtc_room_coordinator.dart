@@ -92,7 +92,7 @@ class WebRtcRoomCoordinator {
             'sdpMid': candidate.sdpMid,
             'sdpMLineIndex': candidate.sdpMLineIndex,
           },
-        ).catchError(_reportError));
+        ).then<void>((_) {}, onError: (Object error) => _reportError(error)));
       },
       onRemoteTrack: (event) => onRemoteTrack?.call(peerUid, event),
       onConnectionState: (state) {
@@ -140,9 +140,7 @@ class WebRtcRoomCoordinator {
     final peerUid = data['senderUid'];
     final type = data['signalType'];
     final payload = data['payload'];
-    if (peerUid is! String ||
-        !_activePeers.contains(peerUid) ||
-        payload is! Map<String, dynamic>) {
+    if (peerUid is! String || payload is! Map<String, dynamic>) {
       throw StateError('وصلت إشارة WebRTC غير متوقعة.');
     }
 
