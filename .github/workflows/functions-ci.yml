@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - feature/free-webrtc-audio-foundation
     paths:
       - "functions/**"
       - "firebase.json"
