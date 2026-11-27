@@ -1,9 +1,12 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/webrtc_room_coordinator.dart';
 
 class RoomScreen extends StatefulWidget {
-  const RoomScreen({super.key, required this.roomName});
+  const RoomScreen({super.key, required this.roomName, required this.roomId});
   final String roomName;
+  final String roomId;
 
   @override
   State<RoomScreen> createState() => _RoomScreenState();
@@ -11,6 +14,10 @@ class RoomScreen extends StatefulWidget {
 
 class _RoomScreenState extends State<RoomScreen> {
   bool micRequested = false;
+  bool voiceConnected = false;
+  bool microphoneEnabled = false;
+  bool voiceBusy = false;
+  WebRtcRoomCoordinator? _voiceCoordinator;
   int likes = 128;
   int selectedSeat = -1;
   int requestedSeat = -1;
@@ -22,7 +29,101 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   void dispose() {
     _roomMessageController.dispose();
+    final coordinator = _voiceCoordinator;
+    if (coordinator != null) {
+      unawaited(coordinator.leave());
+    }
     super.dispose();
+  }
+
+  Future<void> _startVoice() async {
+    if (voiceConnected || voiceBusy) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('سجّل الدخول أولاً للاتصال الصوتي.')),
+      );
+      return;
+    }
+    setState(() => voiceBusy = true);
+    final coordinator = WebRtcRoomCoordinator(
+      roomId: widget.roomId,
+      uid: user.uid,
+      iceServers: {
+        'iceServers': [
+          {'urls': ['stun:stun.l.google.com:19302']},
+          {'urls': ['stun:stun1.l.google.com:19302']},
+        ],
+      },
+      onError: (error) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('مشكلة في الاتصال الصوتي: $error')),
+        );
+      },
+    );
+    try {
+      await coordinator.start();
+      await coordinator.setMicrophoneMuted(true);
+      if (!mounted) {
+        await coordinator.leave();
+        return;
+      }
+      _voiceCoordinator = coordinator;
+      setState(() {
+        voiceConnected = true;
+        microphoneEnabled = false;
+        voiceBusy = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('اتصلت بالغرفة كمستمع. يمكنك تشغيل الميكروفون عند الحاجة.')),
+      );
+    } catch (error) {
+      await coordinator.leave();
+      if (!mounted) return;
+      setState(() => voiceBusy = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر بدء الاتصال الصوتي: $error')),
+      );
+    }
+  }
+
+  Future<void> _toggleMicrophone() async {
+    final coordinator = _voiceCoordinator;
+    if (coordinator == null || !voiceConnected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ابدأ الاتصال الصوتي أولاً.')),
+      );
+      return;
+    }
+    final enable = !microphoneEnabled;
+    try {
+      await coordinator.setMicrophoneMuted(!enable);
+      if (!mounted) return;
+      setState(() => microphoneEnabled = enable);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تعذر تغيير حالة الميكروفون: $error')),
+      );
+    }
+  }
+
+  Future<void> _stopVoice() async {
+    final coordinator = _voiceCoordinator;
+    _voiceCoordinator = null;
+    if (coordinator != null) await coordinator.leave();
+    if (!mounted) return;
+    setState(() {
+      voiceConnected = false;
+      microphoneEnabled = false;
+      voiceBusy = false;
+    });
+  }
+
+  Future<void> _exitRoom() async {
+    await _stopVoice();
+    if (mounted) Navigator.pop(context);
   }
 
   void _sendRoomMessage() {
@@ -546,9 +647,20 @@ class _RoomScreenState extends State<RoomScreen> {
     padding: const EdgeInsets.fromLTRB(5, 7, 5, 9),
     decoration: BoxDecoration(color: const Color(0xFF102A3A).withValues(alpha: .94), borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), border: Border(top: BorderSide(color: Colors.white.withValues(alpha: .10)))),
     child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-      _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', color: Colors.white, onTap: () => Navigator.pop(context)),
+      _RoomButton(icon: Icons.exit_to_app_rounded, label: 'خروج', color: Colors.white, onTap: _exitRoom),
       _RoomButton(icon: Icons.card_giftcard_rounded, label: 'هدايا', color: const Color(0xFFFFC96B), onTap: openGifts),
-      _RoomButton(icon: micRequested ? Icons.mic_rounded : Icons.mic_off_rounded, label: micRequested ? 'إلغاء الطلب' : 'طلب المايك', color: const Color(0xFFB86BFF), onTap: () { setState(() => micRequested = !micRequested); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(micRequested ? 'تم إرسال طلب المايك (واجهة تجريبية)' : 'تم إلغاء طلب المايك'))); }),
+      _RoomButton(
+        icon: voiceConnected ? Icons.call_end_rounded : Icons.headset_mic_rounded,
+        label: voiceBusy ? 'جارٍ الاتصال' : (voiceConnected ? 'قطع الصوت' : 'اتصال صوتي'),
+        color: voiceConnected ? const Color(0xFFFF7777) : const Color(0xFF53E4D0),
+        onTap: voiceConnected ? _stopVoice : _startVoice,
+      ),
+      _RoomButton(
+        icon: microphoneEnabled ? Icons.mic_rounded : Icons.mic_off_rounded,
+        label: microphoneEnabled ? 'كتم المايك' : 'تشغيل المايك',
+        color: const Color(0xFFB86BFF),
+        onTap: _toggleMicrophone,
+      ),
       _RoomButton(icon: speakerEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded, label: speakerEnabled ? 'الصوت' : 'صامت', color: Colors.white, onTap: () => setState(() => speakerEnabled = !speakerEnabled)),
       _RoomButton(icon: Icons.more_horiz_rounded, label: 'الخيارات', color: Colors.white, onTap: _showRoomMenu),
     ]),
