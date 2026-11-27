@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate app icons
+        run: dart run flutter_launcher_icons
+
       - name: Analyze Dart code
         run: flutter analyze
 
@@ -56,6 +59,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate app icons
+        run: dart run flutter_launcher_icons
 
       - name: Build Android APK
         run: flutter build apk --release
