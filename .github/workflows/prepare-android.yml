@@ -60,20 +60,24 @@ jobs:
               manifest.write_text(manifest.read_text().replace('android:label="roqksa"', 'android:label="Roqksa"'))
           PY
 
-      - name: Generate Android launcher icons from Roqksa star-eye artwork
+      - name: Generate Android launcher icons from approved Taiger PNG
         run: |
-          python3 -m pip install --quiet cairosvg
+          python3 -m pip install --quiet Pillow
           python3 - <<'PY'
           from pathlib import Path
-          import cairosvg
-          source = Path("web/icons/roqksa.svg").read_bytes()
+          from PIL import Image
+          source = Path("web/icons/roqksa-taiger-icon-512.png")
+          if not source.is_file():
+              raise SystemExit(f"Approved icon not found: {source}")
+          image = Image.open(source).convert("RGBA")
           sizes = {"mipmap-mdpi":48,"mipmap-hdpi":72,"mipmap-xhdpi":96,"mipmap-xxhdpi":144,"mipmap-xxxhdpi":192}
           base = Path("android/app/src/main/res")
           for folder, size in sizes.items():
               target_dir = base / folder
               target_dir.mkdir(parents=True, exist_ok=True)
-              cairosvg.svg2png(bytestring=source, write_to=str(target_dir / "ic_launcher.png"), output_width=size, output_height=size)
-          print("Generated Android launcher icons from web/icons/roqksa.svg")
+              resized = image.resize((size, size), Image.Resampling.LANCZOS)
+              resized.save(target_dir / "ic_launcher.png", format="PNG", optimize=True)
+          print("Generated Android launcher icons from the approved Taiger PNG.")
           PY
 
       - name: Verify Android package configuration
@@ -90,7 +94,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Android platform files are already up to date."
           else
-            git commit -m "Add Android launcher icon and platform scaffold"
+            git commit -m "Use approved Taiger artwork for Android launcher icon"
             git push origin HEAD:feature/production-foundation
           fi
 
