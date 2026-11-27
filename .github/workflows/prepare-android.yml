@@ -104,3 +104,19 @@ jobs:
           name: roqksa-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
+      - name: Publish public Android test download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-test
+          name: Roqksa Android - نسخة تجريبية
+          body: |
+            نسخة Android تجريبية من Roqksa لتجربة الواجهات فقط.
+
+            تنبيه: هذه النسخة ليست إصداراً إنتاجياً موقعاً للنشر في Google Play. بعض الوظائف مثل الغرف الصوتية والرسائل والهدايا ما زالت تجريبية أو محلية.
+          prerelease: true
+          make_latest: false
+          files: build/app/outputs/flutter-apk/app-release.apk
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
