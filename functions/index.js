@@ -39,9 +39,10 @@ exports.joinVoiceRoom = onCall({ region: REGION }, async (request) => {
 
   const room = roomSnap.data();
   const isHost = room.hostId === uid;
-  const isPrivate = room.isPrivate === true || room.visibility === "private";
-  if (isPrivate && !isHost) {
-    throw new HttpsError("permission-denied", "دخول الغرف الخاصة يحتاج مسار تحقق من رمز القفل.");
+  const isExplicitlyPublic = room.isPrivate === false || room.visibility === "public";
+  // Fail closed: unknown/missing privacy metadata never grants public entry.
+  if (!isHost && !isExplicitlyPublic) {
+    throw new HttpsError("permission-denied", "الغرفة ليست معلنة كغرفة عامة، أو تحتاج تحققاً خاصاً من رمز القفل.");
   }
 
   const participantRef = roomRef.collection("participants").doc(uid);
