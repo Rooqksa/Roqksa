@@ -569,13 +569,15 @@ class _HomeScreenState extends State<HomeScreen> {
       final roomsRef = FirebaseFirestore.instance.collection('rooms');
       final existing = await roomsRef
           .where('title', isEqualTo: roomName)
+          .where('visibility', isEqualTo: 'public')
+          .where('isPrivate', isEqualTo: false)
           .limit(20)
           .get();
 
       String? roomId;
       for (final document in existing.docs) {
         final data = document.data();
-        if (data['visibility'] == 'public' && data['isPrivate'] != true) {
+        if (data['visibility'] == 'public' && data['isPrivate'] == false) {
           roomId = document.id;
           break;
         }
