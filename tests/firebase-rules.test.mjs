@@ -7,12 +7,16 @@ import {
   initializeTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import {
+  collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   setDoc,
   Timestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 import { getBytes, ref, uploadBytes } from 'firebase/storage';
 
@@ -198,6 +202,51 @@ test('room host can edit descriptive fields but cannot transfer ownership', asyn
   await assertFails(updateDoc(doc(alice, 'rooms/room-1'), { hostId: 'bob' }));
   await assertFails(updateDoc(doc(alice, 'rooms/room-1'), { participantCount: 99 }));
   await assertFails(updateDoc(doc(bob, 'rooms/room-1'), { title: 'اختراق' }));
+});
+
+test('voice participants and WebRTC signals are restricted to active room members', async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'rooms/voice-1'), { hostId: 'host' });
+    for (const uid of ['host', 'alice', 'bob']) {
+      await setDoc(doc(db, `rooms/voice-1/participants/${uid}`), {
+        uid,
+        status: 'active',
+      });
+    }
+    await setDoc(doc(db, 'rooms/voice-1/rtcSignals/signal-for-alice'), {
+      senderUid: 'bob',
+      targetUid: 'alice',
+      signalType: 'offer',
+      payload: { sdp: 'test' },
+    });
+  });
+
+  const alice = testEnv.authenticatedContext('alice').firestore();
+  const bob = testEnv.authenticatedContext('bob').firestore();
+  const mallory = testEnv.authenticatedContext('mallory').firestore();
+
+  await assertSucceeds(getDocs(query(
+    collection(alice, 'rooms/voice-1/participants'),
+    where('status', '==', 'active'),
+  )));
+  await assertFails(getDocs(collection(mallory, 'rooms/voice-1/participants')));
+  await assertSucceeds(getDoc(doc(alice, 'rooms/voice-1/rtcSignals/signal-for-alice')));
+  await assertFails(getDoc(doc(bob, 'rooms/voice-1/rtcSignals/signal-for-alice')));
+  await assertFails(getDoc(doc(mallory, 'rooms/voice-1/rtcSignals/signal-for-alice')));
+
+  await assertFails(setDoc(doc(alice, 'rooms/voice-1/participants/mallory'), {
+    uid: 'mallory',
+    status: 'active',
+  }));
+  await assertFails(setDoc(doc(alice, 'rooms/voice-1/rtcSignals/forged'), {
+    senderUid: 'alice',
+    targetUid: 'mallory',
+    signalType: 'offer',
+    payload: { sdp: 'forged' },
+  }));
+  await assertFails(deleteDoc(doc(bob, 'rooms/voice-1/rtcSignals/signal-for-alice')));
+  await assertSucceeds(deleteDoc(doc(alice, 'rooms/voice-1/rtcSignals/signal-for-alice')));
 });
 
 test('reports can be submitted by their reporter but are not client-readable', async () => {
