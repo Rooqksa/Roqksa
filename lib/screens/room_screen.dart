@@ -76,7 +76,7 @@ class _RoomScreenState extends State<RoomScreen> {
         voiceBusy = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اتصلت بالغرفة كمستمع. يمكنك تشغيل الميكروفون عند الحاجة.')),
+        const SnackBar(content: Text('انضممت إلى الغرفة كمستمع؛ جارٍ البحث عن اتصال صوتي مع الأعضاء الموجودين.')),
       );
     } catch (error) {
       await coordinator.leave();
