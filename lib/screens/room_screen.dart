@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../services/agora_voice_service.dart';
 
 class RoomScreen extends StatefulWidget {
   const RoomScreen({super.key, required this.roomName});
@@ -10,7 +11,10 @@ class RoomScreen extends StatefulWidget {
 }
 
 class _RoomScreenState extends State<RoomScreen> {
-  bool micRequested = false, speakerEnabled = true;
+  bool _voiceConnecting = false, _voiceJoined = false, _micMuted = false;
+  bool speakerEnabled = true;
+  int _remoteUsers = 0;
+  final AgoraVoiceService _voiceService = AgoraVoiceService();
   int requestedSeat = -1;
   final messageController = TextEditingController();
   final List<String> messages = ['أهلاً وسهلاً بالجميع 🌹', 'نورتوا الغرفة ❤️'];
@@ -18,7 +22,67 @@ class _RoomScreenState extends State<RoomScreen> {
   static const green = Color(0xFF27D34D);
 
   @override
-  void dispose() { messageController.dispose(); super.dispose(); }
+  void dispose() {
+    _voiceService.leave();
+    messageController.dispose();
+    super.dispose();
+  }
+
+  String _channelNameForRoom(String name) {
+    var hash = 0;
+    for (final unit in name.codeUnits) {
+      hash = (hash * 31 + unit) & 0x7fffffff;
+    }
+    return 'roqksa_room_$hash';
+  }
+
+  Future<void> _toggleVoice() async {
+    if (_voiceConnecting) return;
+    if (_voiceJoined) {
+      final nextMuted = !_micMuted;
+      try {
+        await _voiceService.setMicrophoneMuted(nextMuted);
+        if (mounted) setState(() => _micMuted = nextMuted);
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تعذر تغيير حالة الميكروفون.')),
+          );
+        }
+      }
+      return;
+    }
+
+    setState(() => _voiceConnecting = true);
+    try {
+      await _voiceService.join(
+        channelName: _channelNameForRoom(widget.roomName),
+        onLocalJoin: () {
+          if (mounted) setState(() => _voiceJoined = true);
+        },
+        onRemoteUserJoined: (uid) {
+          if (mounted) setState(() => _remoteUsers++);
+        },
+        onRemoteUserLeft: (uid) {
+          if (mounted) setState(() => _remoteUsers = math.max(0, _remoteUsers - 1));
+        },
+      );
+      if (mounted) {
+        setState(() => _voiceJoined = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم الاتصال بالغرفة الصوتية.')),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تعذر تشغيل الصوت: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _voiceConnecting = false);
+    }
+  }
 
   void sendMessage() {
     final value = messageController.text.trim();
@@ -354,9 +418,14 @@ class _RoomScreenState extends State<RoomScreen> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(25), borderSide: BorderSide.none)))),
           _chatIcon(Icons.emoji_emotions_outlined, _emojiSheet),
-          _chatIcon(Icons.mic_none_rounded, () => setState(() => micRequested = !micRequested)),
+          _chatIcon(_voiceConnecting ? Icons.hourglass_top_rounded :
+            (_voiceJoined && !_micMuted ? Icons.mic_rounded : Icons.mic_off_rounded), _toggleVoice),
           _chatIcon(speakerEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-            () => setState(() => speakerEnabled = !speakerEnabled)),
+            () async {
+              final next = !speakerEnabled;
+              if (_voiceJoined) await _voiceService.setSpeakerEnabled(next);
+              if (mounted) setState(() => speakerEnabled = next);
+            }),
         ])),
       ]),
     ]),
@@ -372,8 +441,14 @@ class _RoomScreenState extends State<RoomScreen> {
       _bottomAction(Icons.chat_bubble_outline, 'الدردشة', () {}),
       _bottomAction(Icons.card_giftcard, 'الهدايا', _giftSheet, color: const Color(0xFFFF9BCB)),
       _bottomAction(Icons.menu, 'القائمة', _roomMenu),
-      _bottomAction(micRequested ? Icons.mic_rounded : Icons.mic_off_rounded, micRequested ? 'إلغاء الطلب' : 'طلب المايك',
-        () => setState(() => micRequested = !micRequested), color: aqua),
+      _bottomAction(
+        _voiceConnecting ? Icons.hourglass_top_rounded :
+          (_voiceJoined && !_micMuted ? Icons.mic_rounded : Icons.mic_off_rounded),
+        _voiceConnecting ? 'جاري الاتصال' :
+          (!_voiceJoined ? 'تشغيل الصوت' : (_micMuted ? 'فتح المايك' : 'كتم المايك')),
+        _toggleVoice,
+        color: aqua,
+      ),
       _bottomAction(Icons.exit_to_app, 'خروج', () => Navigator.pop(context)),
     ]));
 

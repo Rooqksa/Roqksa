@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.roqksa.app"
-    compileSdk = flutter.compileSdkVersion
+    // Agora Android SDK and its AndroidX dependencies require API 34 or newer.
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
