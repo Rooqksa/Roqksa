@@ -48,7 +48,8 @@ export default { async fetch(request,env) {
     if(!env.AGORA_APP_ID||!env.AGORA_APP_CERTIFICATE)
       return reply({error:"إعدادات Agora غير مكتملة في Cloudflare."},500,origin);
     const uid=await uidFor(user.sub);
-    const token=RtcTokenBuilder.buildTokenWithUid(env.AGORA_APP_ID,env.AGORA_APP_CERTIFICATE,channel,uid,RtcRole.PUBLISHER,TOKEN_TTL,TOKEN_TTL);
+    const expireAt=Math.floor(Date.now()/1000)+TOKEN_TTL;
+    const token=RtcTokenBuilder.buildTokenWithUid(env.AGORA_APP_ID,env.AGORA_APP_CERTIFICATE,channel,uid,RtcRole.PUBLISHER,expireAt,expireAt);
     return reply({appId:env.AGORA_APP_ID,channelName:channel,uid,token,expiresIn:TOKEN_TTL},200,origin);
   } catch(e) {
     console.error("Agora token error:",e?.message||e);
