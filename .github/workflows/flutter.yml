@@ -54,6 +54,18 @@ jobs:
       - name: Generate Android and iOS project folders
         run: flutter create --platforms=android,ios --org com.roqksa .
 
+      - name: Set Android compile SDK for Agora
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('android/app/build.gradle.kts')
+          content = path.read_text()
+          content = content.replace('compileSdk = flutter.compileSdkVersion', 'compileSdk = 34')
+          path.write_text(content)
+          if 'compileSdk = 34' not in content:
+              raise SystemExit('Failed to set Android compileSdk to 34')
+          PY
+
       - name: Install dependencies
         run: flutter pub get
 
