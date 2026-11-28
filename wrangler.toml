@@ -1,0 +1,4 @@
+name = "roqksa-agora"
+main = "cloudflare/worker.js"
+compatibility_date = "2026-11-28"
+compatibility_flags = ["nodejs_compat"]
