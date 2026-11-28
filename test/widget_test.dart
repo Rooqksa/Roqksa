@@ -125,7 +125,7 @@ void main() {
   });
 
  
-  testWidgets('room controls update local mic and seat request', (tester) async {
+  testWidgets('room controls show voice action and update seat request', (tester) async {
     tester.view.physicalSize = const Size(390, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -137,9 +137,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('غرفة الاختبار'), findsOneWidget);
-    await tester.tap(find.text('طلب المايك'));
-    await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+    expect(find.text('تشغيل الصوت'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.add).first);
     await tester.pumpAndSettle();
